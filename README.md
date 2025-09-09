@@ -1,2 +1,2 @@
-# BASCA
-BASCA - Personal Finances
+# CASA
+CASA - A Personal Finance App for Your Home
