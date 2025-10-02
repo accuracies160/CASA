@@ -1,0 +1,26 @@
+spring:
+  application:
+    name: casa-backend
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        format_sql: true
+  datasource:
+    url: jdbc:mysql://db:3306/casa?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+    username: ${MYSQL_USER:casa}
+    password: ${MYSQL_PASSWORD:casa}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  flyway:
+    enabled: false
+
+server:
+  port: 8080
+
+app:
+  security:
+    jwt-secret: ${JWT_SECRET:ZmFrZV9sb25nZXJfZGV2X3NlY3JldF90aGFuXzMyYnl0ZXM=}
+  cors:
+    allowed-origins: http://localhost:5173
+    allowed-methods: GET,POST,PUT,DELETE,OPTIONS
