@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { AppBar, Toolbar, Typography, Container, Paper, TextField, Button, Alert, Box } from '@mui/material';
-import { api, setToken, getToken } from './api';
+import { api, setToken, getToken } from '../api';
 
 export default function App() {
   const [email, setEmail] = useState('');
