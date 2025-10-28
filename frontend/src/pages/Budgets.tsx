@@ -5,7 +5,7 @@ import LeftSidebar from '../components/sidebars/LeftSidebar';
 import RightSidebar from '../components/sidebars/RightSidebar';
 import logo from "../assets/images/Logo.png";
 
-export default function Home() {
+export default function Budgets() {
   const navigate = useNavigate();
 
     return (
@@ -39,7 +39,7 @@ export default function Home() {
               sx = {{
                 fontWeight: "bold",
                 letterSpacing: 1,
-                color: "black",
+                color: "red",
               }}
               >
               CASA

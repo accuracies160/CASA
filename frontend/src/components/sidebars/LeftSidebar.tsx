@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { AppBar, Toolbar, Typography, Container, Paper, TextField, Button, Alert, Box } from '@mui/material';
-import {Drawer, List, ListItem, ListItemIcon, ListItemText, Divider} from '@mui/material';
+import {Drawer, List, ListItem, Divider, Toolbar, Typography, Button, Box } from '@mui/material';
+import { useNavigate } from 'react-router-dom';
 
 // Imports for icons
 import DashboardIcon from '@mui/icons-material/Dashboard';
@@ -30,6 +30,8 @@ const buttonStyle = {
   }
 
 export default function LeftSidebar() {
+  const navigate = useNavigate();
+
     return (
         <Drawer 
           variant='permanent'
@@ -72,13 +74,19 @@ export default function LeftSidebar() {
                 </ListItem>
 
                 <ListItem>
-                  <CustomButton startIcon = {<DashboardIcon />}> 
+                  <CustomButton 
+                  startIcon = {<DashboardIcon />}
+                  onClick={() => navigate("/home")}
+                  > 
                     Overview
                   </CustomButton>
                 </ListItem>
 
                 <ListItem>
-                <CustomButton startIcon = {<AccountBalanceWalletIcon />}> 
+                <CustomButton 
+                startIcon = {<AccountBalanceWalletIcon />}
+                onClick={() => navigate("/budgets")}
+                > 
                     Budgets
                   </CustomButton>
                 </ListItem>

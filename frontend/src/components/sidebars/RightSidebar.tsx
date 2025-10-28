@@ -45,6 +45,8 @@ export default function RightSidebar() {
           <Button 
             startIcon = {<AccountCircle />}
                 sx = {{
+                marginTop: 1,
+                width: "85%",
                 borderRadius: "20px",
                 fontWeight: "bold",
                 fontSize: "18px",
