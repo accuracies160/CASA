@@ -1,13 +1,6 @@
-import {
-  Box,
-  Divider,
-  List,
-  ListItemButton,
-  ListItemIcon,
-  ListItemText,
-  Toolbar,
-  Typography,
-} from "@mui/material";
+import {Box, Divider, List, ListItemButton, ListItemIcon, ListItemText, Toolbar, Typography, Drawer} from "@mui/material";
+
+/* Import for icons */
 import DashboardIcon from "@mui/icons-material/Dashboard";
 import AccountBalanceWalletIcon from "@mui/icons-material/AccountBalanceWallet";
 import FlagIcon from "@mui/icons-material/Flag";
@@ -45,17 +38,19 @@ export default function Sidebar() {
             component={NavLink}
             to={to}
             sx={{
+              color: "white",
               mb: 0.5,
               borderRadius: 2,
-              color: active ? "primary.contrastText" : "inherit",
-              ...(active && {
-                bgcolor: "primary.main",
-                "& .MuiListItemIcon-root": { color: "primary.contrastText" },
-              }),
+              transition: "background-color 0.4s ease",
+              "&:hover": {backgroundColor: "#1a4d4f"},
             }}
           >
-            <ListItemIcon sx={{ minWidth: 36 }}>{icon}</ListItemIcon>
-            <ListItemText primary={label} />
+            <ListItemIcon sx={{ minWidth: 36, color: "white", }}>{icon}</ListItemIcon>
+            <ListItemText primary={label} 
+            primaryTypographyProps={{
+              fontFamily: "'Open Sans', sans-serif",
+            }}
+            />
           </ListItemButton>
         );
       })}
@@ -63,41 +58,36 @@ export default function Sidebar() {
   );
 
   return (
-    <Box
-      component="nav"
-      sx={{
-        width: 260,
-        flexShrink: 0,
-        bgcolor: "#1f87a2",
-        color: "black",
+    <Drawer
+    variant='permanent'
+    anchor='left'
+    sx = {{
+      width: 240,
+      flexShrink: 0,
+      "& .MuiDrawer-paper": {
+        width: 240,
+        boxSizing: "border-box",
+        backgroundColor: "#052e30",
         display: "flex",
         flexDirection: "column",
-      }}
+        alignItems: "left",
+      },
+    }}
     >
       <Toolbar sx={{ minHeight: 64 }}>
-        <Typography variant="h6" fontWeight={700}>
+        <Typography variant="h6" fontWeight={700}
+        sx = {{
+          color: "white",
+          fontSize: "25px",
+          mb: -2,
+        }}>
           CASA
         </Typography>
       </Toolbar>
-      <Box
-        sx={{ bgcolor: "white", color: "inherit", m: 2, borderRadius: 2, p: 1 }}
-      >
-        <Typography
-          variant="subtitle2"
-          sx={{ px: 2, py: 1, color: "text.secondary" }}
-        >
-          Main Menu
-        </Typography>
         {renderList(items as any)}
         <Divider sx={{ my: 1.5 }} />
-        <Typography
-          variant="subtitle2"
-          sx={{ px: 2, py: 1, color: "text.secondary" }}
-        >
-          General
-        </Typography>
+
         {renderList(secondary as any)}
-      </Box>
-    </Box>
+      </Drawer>
   );
 }

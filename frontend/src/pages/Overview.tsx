@@ -1,37 +1,8 @@
 import { useMemo, useState } from "react";
-import {
-  Box,
-  Card,
-  CardContent,
-  Grid,
-  Typography,
-  Chip,
-  Divider,
-  ToggleButtonGroup,
-  ToggleButton,
-  Table,
-  TableHead,
-  TableRow,
-  TableCell,
-  TableBody,
-  MenuItem,
-  Select,
-  Stack,
-} from "@mui/material";
+import {Box, Card, CardContent, Grid, Typography, Chip, Divider, ToggleButtonGroup, ToggleButton, Table, TableHead, TableRow, TableCell, TableBody, MenuItem, Select, Stack, } from "@mui/material";
 import ArrowDropUpIcon from "@mui/icons-material/ArrowDropUp";
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
-import {
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  ResponsiveContainer,
-  Tooltip,
-  Legend,
-  PieChart,
-  Pie,
-  Cell,
-} from "recharts";
+import {BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Tooltip, Legend, PieChart, Pie, Cell,} from "recharts";
 
 const kpi = [
   { label: "My Balance", value: 23516, delta: +20 },
