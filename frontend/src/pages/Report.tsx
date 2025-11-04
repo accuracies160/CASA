@@ -1,0 +1,8 @@
+import { Typography, Box } from "@mui/material";
+export default function Report() {
+  return (
+    <Box>
+      <Typography variant="h4">Report</Typography>
+    </Box>
+  );
+}
