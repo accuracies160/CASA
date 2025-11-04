@@ -1,8 +1,9 @@
 import { useMemo, useState } from "react";
-import {Box, Card, CardContent, Grid, Typography, Chip, Divider, ToggleButtonGroup, ToggleButton, Table, TableHead, TableRow, TableCell, TableBody, MenuItem, Select, Stack, } from "@mui/material";
+import {Box, Card, CardContent, Grid, Typography, Chip, Divider, ToggleButtonGroup, ToggleButton, Table, TableHead, TableRow, TableCell, TableBody, MenuItem, Select, Stack, Button } from "@mui/material";
 import ArrowDropUpIcon from "@mui/icons-material/ArrowDropUp";
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
 import {BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Tooltip, Legend, PieChart, Pie, Cell,} from "recharts";
+import AccountCircle from '@mui/icons-material/AccountCircle';
 
 const kpi = [
   { label: "My Balance", value: 23516, delta: +20 },
@@ -290,7 +291,7 @@ export default function Overview() {
                 justifyContent="center"
                 alignItems="center"
                 spacing={1}
-                mt={-7}
+                mt={-1}
                 mb={1}
               >
                 <Typography variant="caption" color="text.secondary">

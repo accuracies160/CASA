@@ -78,6 +78,7 @@ export default function Sidebar() {
         <Typography variant="h6" fontWeight={700}
         sx = {{
           color: "white",
+          fontFamily: "'Raleway', sans-serif",
           fontSize: "25px",
           mb: -2,
         }}>
