@@ -3,8 +3,19 @@ import ProgressBar from "../components/ProgressBar";
 
 export default function Goals() {
   return (
-    <Box>
-      <Typography variant="h4" fontWeight="bold">
+    <Box 
+    sx = {{
+      display: "flex",
+      justifyContent: "space-between",
+      alignItems: "flex-start",
+    }}
+    >
+      <Box
+      sx = {{
+        flex: 3,
+      }}
+      >
+        <Typography variant="h4" fontWeight="bold">
         Goals
         </Typography>
 
@@ -69,6 +80,7 @@ export default function Goals() {
           </Typography>
           <ProgressBar current={800} target={3600} color="yellow" />
         </Paper>
+      </Box>
     </Box>
     
   );

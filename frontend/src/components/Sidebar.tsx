@@ -1,4 +1,4 @@
-import {Box, Divider, List, ListItemButton, ListItemIcon, ListItemText, Toolbar, Typography, Drawer} from "@mui/material";
+import {Box, Paper, Divider, List, ListItemButton, ListItemIcon, ListItemText, Toolbar, Typography, Drawer} from "@mui/material";
 
 /* Import for icons */
 import DashboardIcon from "@mui/icons-material/Dashboard";
@@ -12,7 +12,7 @@ import PersonOutlineIcon from "@mui/icons-material/PersonOutline";
 import { NavLink, useLocation } from "react-router-dom";
 
 const items = [
-  { to: "/overview", label: "Overview", icon: <DashboardIcon /> },
+  { to: "/dashboard", label: "Dashboard", icon: <DashboardIcon /> },
   { to: "/budgets", label: "Budgets", icon: <AccountBalanceWalletIcon /> },
   { to: "/goals", label: "Goals", icon: <FlagIcon /> },
   { to: "/transactions", label: "Transactions", icon: <ReceiptLongIcon /> },
@@ -22,7 +22,6 @@ const items = [
 const secondary = [
   { to: "/settings", label: "Settings", icon: <SettingsIcon /> },
   { to: "/help", label: "Help", icon: <HelpOutlineIcon /> },
-  { to: "/profile", label: "Profile", icon: <PersonOutlineIcon /> },
 ];
 
 export default function Sidebar() {

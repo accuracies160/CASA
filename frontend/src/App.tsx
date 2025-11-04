@@ -1,7 +1,7 @@
 import { Box } from "@mui/material";
 import { Routes, Route, Navigate } from "react-router-dom";
 import Sidebar from "./components/Sidebar";
-import Overview from "./pages/Overview";
+import Dashboard from "./pages/Dashboard";
 import Budgets from "./pages/Budgets";
 import Goals from "./pages/Goals";
 import Transactions from "./pages/Transactions";
@@ -17,7 +17,7 @@ export default function App() {
       <Box component="main" sx={{ flex: 1, overflow: "auto", p: 3 }}>
         <Routes>
           <Route path="/" element={<Navigate to="/overview" replace />} />
-          <Route path="/overview" element={<Overview />} />
+          <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/budgets" element={<Budgets />} />
           <Route path="/goals" element={<Goals />} />
           <Route path="/transactions" element={<Transactions />} />

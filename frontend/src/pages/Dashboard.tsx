@@ -138,7 +138,7 @@ export default function Overview() {
     <Stack spacing={3}>
       <Box>
         <Typography variant="h4" fontWeight={800}>
-          Overview
+          Dashboard
         </Typography>
         <Typography variant="subtitle1" color="text.secondary">
           Welcome back! Here’s your financial summary
