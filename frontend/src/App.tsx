@@ -9,6 +9,7 @@ import Report from "./pages/Report";
 import Settings from "./pages/Settings";
 import Help from "./pages/Help";
 import Profile from "./pages/Profile";
+import Login from "./pages/Login";
 
 export default function App() {
   return (
@@ -25,6 +26,7 @@ export default function App() {
           <Route path="/settings" element={<Settings />} />
           <Route path="/help" element={<Help />} />
           <Route path="/profile" element={<Profile />} />
+          <Route path="/login" element={<Login />} />
           <Route path="*" element={<Navigate to="/overview" replace />} />
         </Routes>
       </Box>

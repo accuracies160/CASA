@@ -1,9 +1,14 @@
 import { useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import {Box, Card, CardContent, Grid, Typography, Chip, Divider, ToggleButtonGroup, ToggleButton, Table, TableHead, TableRow, TableCell, TableBody, MenuItem, Select, Stack, Button } from "@mui/material";
 import ArrowDropUpIcon from "@mui/icons-material/ArrowDropUp";
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
 import {BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Tooltip, Legend, PieChart, Pie, Cell,} from "recharts";
-import AccountCircle from '@mui/icons-material/AccountCircle';
+import SearchIcon from "@mui/icons-material/Search";
+import NotificationsNoneIcon from "@mui/icons-material/NotificationsNone";
+import AccountCircle from "@mui/icons-material/AccountCircle";
+import { IconButton, Avatar } from "@mui/material";
+import TopBar from "../components/TopBar";
 
 const kpi = [
   { label: "My Balance", value: 23516, delta: +20 },
@@ -94,7 +99,9 @@ const currency = (n: number) =>
     maximumFractionDigits: 0,
   });
 
-export default function Overview() {
+export default function Dashboard() {
+  const navigate = useNavigate();
+
   const [period, setPeriod] = useState<"Monthly" | "Weekly" | "Daily">(
     "Monthly"
   );
@@ -136,13 +143,54 @@ export default function Overview() {
 
   return (
     <Stack spacing={3}>
-      <Box>
-        <Typography variant="h4" fontWeight={800}>
-          Dashboard
-        </Typography>
-        <Typography variant="subtitle1" color="text.secondary">
-          Welcome back! Here’s your financial summary
-        </Typography>
+      <Box
+      sx = {{
+        display: "flex",
+        justifyContent: "space-between",
+        alignItems: "center",
+      }}
+      >
+        <Box>
+          <Typography variant="h4" fontWeight={800}>
+            Dashboard
+          </Typography>
+          <Typography variant="subtitle1" color="text.secondary">
+            Welcome back! Here’s your financial summary
+          </Typography>
+        </Box>
+
+        <Stack direction="row" spacing={1} alignItems="center">
+          <IconButton
+          sx = {{
+            backgroundColor: "#fffff",
+            boxShadow: 1,
+            "&:hover": {backgroundColor: "#f5f5f5"},
+          }}
+          >
+            <SearchIcon />
+          </IconButton>
+
+          <IconButton
+            sx = {{
+              backgroundColor: "#fffff",
+              boxShadow: 1,
+              "&:hover": {backgroundColor: "#f5f5f5"},
+            }}
+            >
+              <NotificationsNoneIcon />
+          </IconButton>
+
+          <IconButton
+            onClick = {() => navigate("/login")}
+            sx = {{
+              backgroundColor: "#fffff",
+              boxShadow: 1,
+              "&:hover": {backgroundColor: "#f5f5f5"},
+            }}
+            >
+              <AccountCircle />
+          </IconButton>
+        </Stack>
       </Box>
 
       <Grid container spacing={2}>
