@@ -16,7 +16,7 @@ export default function App() {
       <Sidebar />
       <Box component="main" sx={{ flex: 1, overflow: "auto", p: 3 }}>
         <Routes>
-          <Route path="/" element={<Navigate to="/overview" replace />} />
+          <Route path="/" element={<Navigate to="/dashboard" replace />} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/budgets" element={<Budgets />} />
           <Route path="/goals" element={<Goals />} />
