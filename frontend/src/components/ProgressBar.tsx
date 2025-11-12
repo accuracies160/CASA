@@ -8,7 +8,8 @@ interface ProgressBarProps {
 }
 
 export default function ProgressBar({current, target, color = "#3CA0CA" }: ProgressBarProps) {
-    const progress = (current / target) * 100;
+    const rawPercent = (current / target) * 100;
+    const progress = Math.min(rawPercent, 100);
 
     return (
         <Box
@@ -34,7 +35,7 @@ export default function ProgressBar({current, target, color = "#3CA0CA" }: Progr
             }}
         />
 
-        <Typography variant="body2" color="test.secondary" mt={1}>
+        <Typography variant="body2" color="text.secondary" mt={1}>
             {progress.toFixed(0)}% Complete
         </Typography>
         </Box>

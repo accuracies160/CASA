@@ -180,6 +180,14 @@ export default function Dashboard() {
               <NotificationsNoneIcon />
           </IconButton>
 
+          <Divider 
+          orientation="vertical"
+          sx= {{
+            bgcolor: "#ebecee",
+            height: 35,
+          }} 
+          />
+
           <IconButton
             onClick = {() => navigate("/login")}
             sx = {{
