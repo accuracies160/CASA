@@ -6,14 +6,16 @@ Whether you’re splitting rent, saving for your next trip, or just trying to ma
 
 ---
 
-✨ Key Features
-🧾 Expense Tracking — Log your daily transactions with just a few clicks.
-📊 Visual Insights — Interactive charts and analytics that reveal your spending habits.
-💬 Smart Service Chat — Get quick answers, tips, and help through an integrated in-app chat.
-🤖 AI Finance Advisor — Receive personalized financial advice, summaries, and savings suggestions powered by AI.
-🔍 Smart Filters — Search and filter expenses by category, date, or payment status.
-💼 Multi-Category Management — Track expenses across groceries, rent, leisure, transport, and more.
-📅 Transaction History — Keep an organized record of every expense and income source.
+## ✨ Key Features
+
+- 🧾 **Expense Tracking** — Log your daily transactions with just a few clicks.  
+- 📊 **Visual Insights** — Interactive charts and analytics that reveal your spending habits.  
+- 💬 **Smart Service Chat** — Get quick answers, tips, and help through an integrated in-app chat.  
+- 🤖 **AI Finance Advisor** — Receive personalized financial advice, summaries, and savings suggestions powered by AI.  
+- 🔍 **Smart Filters** — Search and filter expenses by category, date, or payment status.  
+- 💼 **Multi-Category Management** — Track expenses across groceries, rent, leisure, transport, and more.  
+- 📅 **Transaction History** — Keep an organized record of every expense and income source.
+
 ---
 
 ## 🚀 Getting Started
