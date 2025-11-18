@@ -50,35 +50,35 @@ const kpi = [
 ];
 
 const monthlyData = [
-  { name: "Jan", income: 3200, expense: 2800 },
-  { name: "Feb", income: 3000, expense: 2600 },
-  { name: "Mar", income: 3400, expense: 3150 },
-  { name: "Apr", income: 1500, expense: 1200 },
-  { name: "May", income: 2200, expense: 2350 },
-  { name: "Jun", income: 1800, expense: 1100 },
+  { name: "Jan", income: 3200, expense: 1600 },
+  { name: "Feb", income: 3000, expense: 1400 },
+  { name: "Mar", income: 3400, expense: 1150 },
+  { name: "Apr", income: 3500, expense: 1200 },
+  { name: "May", income: 3200, expense: 1550 },
+  { name: "Jun", income: 3800, expense: 1800 },
   { name: "Jul", income: 3300, expense: 2100 },
-  { name: "Aug", income: 1200, expense: 900 },
-  { name: "Sep", income: 1700, expense: 1500 },
-  { name: "Oct", income: 3600, expense: 3400 },
-  { name: "Nov", income: 1600, expense: 1200 },
+  { name: "Aug", income: 3200, expense: 1900 },
+  { name: "Sep", income: 3700, expense: 1500 },
+  { name: "Oct", income: 3600, expense: 1400 },
+  { name: "Nov", income: 3600, expense: 1200 },
   { name: "Dec", income: 3400, expense: 1400 },
 ];
 
 const weeklyData = [
-  { name: "Week 1", income: 1200, expense: 800 },
-  { name: "Week 2", income: 1500, expense: 900 },
-  { name: "Week 3", income: 1000, expense: 1100 },
-  { name: "Week 4", income: 1800, expense: 1300 },
+  { name: "Week 1", income: 800, expense: 400 },
+  { name: "Week 2", income: 1000, expense: 500 },
+  { name: "Week 3", income: 800, expense: 400 },
+  { name: "Week 4", income: 1100, expense: 450 },
 ];
 
 const dailyData = [
-  { name: "Mon", income: 500, expense: 300 },
-  { name: "Tue", income: 700, expense: 400 },
-  { name: "Wed", income: 800, expense: 450 },
-  { name: "Thu", income: 600, expense: 500 },
-  { name: "Fri", income: 900, expense: 600 },
-  { name: "Sat", income: 300, expense: 200 },
-  { name: "Sun", income: 400, expense: 350 },
+  { name: "Mon", income: 180, expense: 0 },
+  { name: "Tue", income: 170, expense: 0 },
+  { name: "Wed", income: 190, expense: 50 },
+  { name: "Thu", income: 180, expense: 50 },
+  { name: "Fri", income: 170, expense: 50 },
+  { name: "Sat", income: 0, expense: 200 },
+  { name: "Sun", income: 0, expense: 100 },
 ];
 
 const cashFlow = [
