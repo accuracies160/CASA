@@ -340,21 +340,21 @@ export default function Dashboard() {
                     />
                     <Legend />
                     <Line
-                      type="monotone"
+                      type="monotoneX"
                       dataKey="income"
                       name="Income"
                       stroke="#6ec1e4"
                       strokeWidth={3}
-                      dot={{ r: 4 }}
+                      dot={false}
                       activeDot={{ r: 6 }}
                     />
                     <Line
-                      type="monotone"
+                      type="monotoneX"
                       dataKey="expense"
                       name="Expenses"
                       stroke="#f5b971"
                       strokeWidth={3}
-                      dot={{ r: 4 }}
+                      dot={false}
                       activeDot={{ r: 6 }}
                     />
                   </LineChart>
