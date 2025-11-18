@@ -1,9 +1,41 @@
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import {Box, Menu, Card, CardContent, Grid, Typography, Chip, Divider, ToggleButtonGroup, ToggleButton, Table, TableHead, TableRow, TableCell, TableBody, MenuItem, Select, Stack, Button } from "@mui/material";
+import {
+  Box,
+  Menu,
+  Card,
+  CardContent,
+  Grid,
+  Typography,
+  Chip,
+  Divider,
+  ToggleButtonGroup,
+  ToggleButton,
+  Table,
+  TableHead,
+  TableRow,
+  TableCell,
+  TableBody,
+  MenuItem,
+  Select,
+  Stack,
+  Button,
+} from "@mui/material";
 import ArrowDropUpIcon from "@mui/icons-material/ArrowDropUp";
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
-import {BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Tooltip, Legend, PieChart, Pie, Cell,} from "recharts";
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  ResponsiveContainer,
+  Tooltip,
+  Legend,
+  PieChart,
+  Pie,
+  Cell,
+  CartesianGrid,
+} from "recharts";
 import SearchIcon from "@mui/icons-material/Search";
 import NotificationsNoneIcon from "@mui/icons-material/NotificationsNone";
 import AccountCircle from "@mui/icons-material/AccountCircle";
@@ -110,7 +142,7 @@ export default function Dashboard() {
     } else {
       navigate("/login");
     }
-  }
+  };
 
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
@@ -121,7 +153,7 @@ export default function Dashboard() {
 
   const handleMenuClose = () => {
     setAnchorEl(null);
-  }
+  };
 
   const [period, setPeriod] = useState<"Monthly" | "Weekly" | "Daily">(
     "Monthly"
@@ -139,37 +171,14 @@ export default function Dashboard() {
       ? weeklyData
       : monthlyData;
 
-  <Box sx={{ width: "100%", height: 280 }}>
-    <ResponsiveContainer>
-      <BarChart data={chartData} barGap={6}>
-        <XAxis dataKey="name" />
-        <YAxis tickFormatter={(v) => (v >= 1000 ? `$${v / 1000}k` : `$${v}`)} />
-        <Tooltip formatter={(v: number) => currency(v)} />
-        <Legend />
-        <Bar
-          dataKey="income"
-          name="Income"
-          fill="#6ec1e4"
-          radius={[8, 8, 0, 0]}
-        />
-        <Bar
-          dataKey="expense"
-          name="Expenses"
-          fill="#f5b971"
-          radius={[8, 8, 0, 0]}
-        />
-      </BarChart>
-    </ResponsiveContainer>
-  </Box>;
-
   return (
     <Stack spacing={3}>
       <Box
-      sx = {{
-        display: "flex",
-        justifyContent: "space-between",
-        alignItems: "center",
-      }}
+        sx={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+        }}
       >
         <Box>
           <Typography variant="h4" fontWeight={800}>
@@ -182,47 +191,47 @@ export default function Dashboard() {
 
         <Stack direction="row" spacing={1} alignItems="center">
           <IconButton
-          sx = {{
-            backgroundColor: "#fffff",
-            boxShadow: 1,
-            "&:hover": {backgroundColor: "#f5f5f5"},
-          }}
+            sx={{
+              backgroundColor: "#fffff",
+              boxShadow: 1,
+              "&:hover": { backgroundColor: "#f5f5f5" },
+            }}
           >
             <SearchIcon />
           </IconButton>
 
           <IconButton
-            sx = {{
+            sx={{
               backgroundColor: "#fffff",
               boxShadow: 1,
-              "&:hover": {backgroundColor: "#f5f5f5"},
+              "&:hover": { backgroundColor: "#f5f5f5" },
             }}
-            >
-              <NotificationsNoneIcon />
+          >
+            <NotificationsNoneIcon />
           </IconButton>
 
-          <Divider 
-          orientation="vertical"
-          sx= {{
-            bgcolor: "#ebecee",
-            height: 35,
-          }} 
+          <Divider
+            orientation="vertical"
+            sx={{
+              bgcolor: "#ebecee",
+              height: 35,
+            }}
           />
 
           <IconButton
-            onClick = {handleMenuOpen}
-            sx = {{
+            onClick={handleMenuOpen}
+            sx={{
               backgroundColor: "#fffff",
               boxShadow: 1,
-              "&:hover": {backgroundColor: "#f5f5f5"},
+              "&:hover": { backgroundColor: "#f5f5f5" },
             }}
-            >
-              <AccountCircle />
+          >
+            <AccountCircle />
           </IconButton>
 
           <Menu
             anchorEl={anchorEl}
-            open = {open}
+            open={open}
             onClose={handleMenuClose}
             anchorOrigin={{
               vertical: "bottom",
@@ -255,7 +264,6 @@ export default function Dashboard() {
               Logout
             </MenuItem>
           </Menu>
-          
         </Stack>
       </Box>
 
@@ -315,28 +323,41 @@ export default function Dashboard() {
 
               <Box sx={{ width: "100%", height: 280 }}>
                 <ResponsiveContainer>
-                  <BarChart data={monthlyData} barGap={6}>
+                  <LineChart
+                    data={chartData}
+                    margin={{ top: 10, right: 20, left: -10, bottom: 0 }}
+                  >
+                    <CartesianGrid strokeDasharray="3 3" vertical={false} />
                     <XAxis dataKey="name" />
                     <YAxis
                       tickFormatter={(v) =>
                         v >= 1000 ? `$${v / 1000}k` : `$${v}`
                       }
                     />
-                    <Tooltip formatter={(v: number) => currency(v)} />
+                    <Tooltip
+                      formatter={(value: number) => currency(value)}
+                      labelFormatter={(label) => label}
+                    />
                     <Legend />
-                    <Bar
+                    <Line
+                      type="monotone"
                       dataKey="income"
                       name="Income"
-                      fill="#6ec1e4"
-                      radius={[8, 8, 0, 0]}
+                      stroke="#6ec1e4"
+                      strokeWidth={3}
+                      dot={{ r: 4 }}
+                      activeDot={{ r: 6 }}
                     />
-                    <Bar
+                    <Line
+                      type="monotone"
                       dataKey="expense"
                       name="Expenses"
-                      fill="#f5b971"
-                      radius={[8, 8, 0, 0]}
+                      stroke="#f5b971"
+                      strokeWidth={3}
+                      dot={{ r: 4 }}
+                      activeDot={{ r: 6 }}
                     />
-                  </BarChart>
+                  </LineChart>
                 </ResponsiveContainer>
               </Box>
             </CardContent>
