@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import {Box, Card, CardContent, Grid, Typography, Chip, Divider, ToggleButtonGroup, ToggleButton, Table, TableHead, TableRow, TableCell, TableBody, MenuItem, Select, Stack, Button } from "@mui/material";
+import {Box, Menu, Card, CardContent, Grid, Typography, Chip, Divider, ToggleButtonGroup, ToggleButton, Table, TableHead, TableRow, TableCell, TableBody, MenuItem, Select, Stack, Button } from "@mui/material";
 import ArrowDropUpIcon from "@mui/icons-material/ArrowDropUp";
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
 import {BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Tooltip, Legend, PieChart, Pie, Cell,} from "recharts";
@@ -102,6 +102,27 @@ const currency = (n: number) =>
 export default function Dashboard() {
   const navigate = useNavigate();
 
+  const handleAccountClick = () => {
+    const isLoggedIn = localStorage.getItem("loggedIn") === "true";
+
+    if (isLoggedIn) {
+      navigate("/profile");
+    } else {
+      navigate("/login");
+    }
+  }
+
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const open = Boolean(anchorEl);
+
+  const handleMenuOpen = (event: React.MouseEvent<HTMLButtonElement>) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleMenuClose = () => {
+    setAnchorEl(null);
+  }
+
   const [period, setPeriod] = useState<"Monthly" | "Weekly" | "Daily">(
     "Monthly"
   );
@@ -189,7 +210,7 @@ export default function Dashboard() {
           />
 
           <IconButton
-            onClick = {() => navigate("/login")}
+            onClick = {handleMenuOpen}
             sx = {{
               backgroundColor: "#fffff",
               boxShadow: 1,
@@ -198,6 +219,43 @@ export default function Dashboard() {
             >
               <AccountCircle />
           </IconButton>
+
+          <Menu
+            anchorEl={anchorEl}
+            open = {open}
+            onClose={handleMenuClose}
+            anchorOrigin={{
+              vertical: "bottom",
+              horizontal: "right",
+            }}
+            transformOrigin={{
+              vertical: "top",
+              horizontal: "right",
+            }}
+          >
+            <MenuItem
+              onClick={() => {
+                handleMenuClose();
+                navigate("/profile");
+              }}
+            >
+              Profile
+            </MenuItem>
+
+            <Divider orientation="horizontal" />
+
+            <MenuItem
+              onClick={() => {
+                handleMenuClose();
+                localStorage.removeItem("loggedIn");
+                localStorage.removeItem("displaName");
+                navigate("/login");
+              }}
+            >
+              Logout
+            </MenuItem>
+          </Menu>
+          
         </Stack>
       </Box>
 

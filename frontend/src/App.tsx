@@ -10,10 +10,11 @@ import Settings from "./pages/Settings";
 import Help from "./pages/Help";
 import Profile from "./pages/Profile";
 import Login from "./pages/Login";
+import Signup from "./pages/Signup";
 
 export default function App() {
   const location = useLocation();
-  const hideSidebar = location.pathname === "/login";
+  const hideSidebar = location.pathname === "/login" || location.pathname === "/signup";
 
   return (
     <Box sx={{ display: "flex", height: "100vh", overflow: "hidden" }}>
@@ -32,6 +33,7 @@ export default function App() {
           <Route path="/help" element={<Help />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="/login" element={<Login />} />
+          <Route path="/signup" element={<Signup />} />
           <Route path="*" element={<Navigate to="/overview" replace />} />
         </Routes>
       </Box>
