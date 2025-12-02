@@ -105,7 +105,12 @@ export default function Login() {
 
         </Stack>
 
-        <Typography mt={2} textAlign="center">
+        <Typography mt={2} 
+        textAlign="center"
+        sx = {{
+          color: message.includes("Succssful") ? "green" : "red",
+        }}
+        >
           {message}
         </Typography>
       </Paper>

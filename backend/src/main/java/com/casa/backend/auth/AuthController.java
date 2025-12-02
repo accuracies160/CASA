@@ -71,16 +71,23 @@ public class AuthController {
      */
     @PostMapping("/login")
     public ResponseEntity<?> login(@Valid @RequestBody LoginRequest r) {
-
-        auth.authenticate(
-                new UsernamePasswordAuthenticationToken(
-                        r.email(),
-                        r.password()
-                )
-        );
-
-        User u = users.findByEmail(r.email()).orElseThrow();
-
-        return ResponseEntity.ok("Login successful for user: " + u.getDisplayName());
-    }
+        try {
+            auth.authenticate(
+                    new UsernamePasswordAuthenticationToken(
+                            r.email(),
+                            r.password()
+                    )
+            );
+    
+            User u = users.findByEmail(r.email()).orElseThrow();
+    
+            return ResponseEntity.ok("Login successful for user: " + u.getDisplayName());
+    
+        } catch (Exception e) {
+            // Authentication failed
+            return ResponseEntity
+                    .status(401)
+                    .body("Invalid email or password");
+        }
+    }    
 }

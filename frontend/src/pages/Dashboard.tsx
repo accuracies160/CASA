@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Box,
@@ -19,7 +19,7 @@ import {
   MenuItem,
   Select,
   Stack,
-  Button,
+  IconButton,
 } from "@mui/material";
 import ArrowDropUpIcon from "@mui/icons-material/ArrowDropUp";
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
@@ -39,111 +39,27 @@ import {
 import SearchIcon from "@mui/icons-material/Search";
 import NotificationsNoneIcon from "@mui/icons-material/NotificationsNone";
 import AccountCircle from "@mui/icons-material/AccountCircle";
-import { IconButton, Avatar } from "@mui/material";
-import TopBar from "../components/TopBar";
-
-const kpi = [
-  { label: "My Balance", value: 23516, delta: +20 },
-  { label: "Total Income", value: 45454, delta: +19 },
-  { label: "Total Savings", value: 32654, delta: -22 },
-  { label: "Total Expenses", value: 21938, delta: -27 },
-];
-
-const monthlyData = [
-  { name: "Jan", income: 3200, expense: 1600 },
-  { name: "Feb", income: 3000, expense: 1400 },
-  { name: "Mar", income: 3400, expense: 1150 },
-  { name: "Apr", income: 3500, expense: 1200 },
-  { name: "May", income: 3200, expense: 1550 },
-  { name: "Jun", income: 3800, expense: 1800 },
-  { name: "Jul", income: 3300, expense: 2100 },
-  { name: "Aug", income: 3200, expense: 1900 },
-  { name: "Sep", income: 3700, expense: 1500 },
-  { name: "Oct", income: 3600, expense: 1400 },
-  { name: "Nov", income: 3600, expense: 1200 },
-  { name: "Dec", income: 3400, expense: 1400 },
-];
-
-const weeklyData = [
-  { name: "Week 1", income: 800, expense: 400 },
-  { name: "Week 2", income: 1000, expense: 500 },
-  { name: "Week 3", income: 800, expense: 400 },
-  { name: "Week 4", income: 1100, expense: 450 },
-];
-
-const dailyData = [
-  { name: "Mon", income: 180, expense: 0 },
-  { name: "Tue", income: 170, expense: 0 },
-  { name: "Wed", income: 190, expense: 50 },
-  { name: "Thu", income: 180, expense: 50 },
-  { name: "Fri", income: 170, expense: 50 },
-  { name: "Sat", income: 0, expense: 200 },
-  { name: "Sun", income: 0, expense: 100 },
-];
-
-const cashFlow = [
-  { name: "Salary", value: 6200 },
-  { name: "Expenses", value: 3865 },
-];
-
-const tx = [
-  {
-    date: "10/12/25",
-    name: "Resturant",
-    type: "Cash",
-    category: "Food",
-    amount: -10.0,
-  },
-  {
-    date: "10/10/25",
-    name: "Resturant",
-    type: "Cash",
-    category: "Food",
-    amount: -50,
-  },
-  {
-    date: "10/10/25",
-    name: "Paycheck",
-    type: "Check",
-    category: "Paycheck",
-    amount: 7000,
-  },
-  {
-    date: "10/07/25",
-    name: "Share Market",
-    type: "Check",
-    category: "Business",
-    amount: 11000,
-  },
-  {
-    date: "10/06/25",
-    name: "Invest Money",
-    type: "Check",
-    category: "Business",
-    amount: 11000,
-  },
-];
-
-const currency = (n: number) =>
-  n.toLocaleString(undefined, {
-    style: "currency",
-    currency: "USD",
-    maximumFractionDigits: 0,
-  });
 
 export default function Dashboard() {
   const navigate = useNavigate();
 
-  const handleAccountClick = () => {
-    const isLoggedIn = localStorage.getItem("loggedIn") === "true";
+  /* ---------------- LOGIN STATE ---------------- */
+  const [isLoggedIn, setIsLoggedIn] = useState(
+    Boolean(localStorage.getItem("loggedIn"))
+  );
 
-    if (isLoggedIn) {
-      navigate("/profile");
-    } else {
-      navigate("/login");
+  useEffect(() => {
+    const loggedIn = localStorage.getItem("loggedIn");
+    const displayName = localStorage.getItem("displayName");
+
+    if (loggedIn && (!displayName || displayName.trim() === "")) {
+      localStorage.removeItem("loggedIn");
+      localStorage.removeItem("displayName");
+      setIsLoggedIn(false);
     }
-  };
+  }, []);
 
+  /* ---------------- MENU ---------------- */
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
 
@@ -155,13 +71,117 @@ export default function Dashboard() {
     setAnchorEl(null);
   };
 
+  const handleLogout = () => {
+    handleMenuClose();
+    localStorage.removeItem("loggedIn");
+    localStorage.removeItem("displayName");
+    setIsLoggedIn(false);
+    navigate("/login");
+  };
+
+  /* -------------------------------------- */
+
+  /* ---------------- CHART STATE ---------------- */
   const [period, setPeriod] = useState<"Monthly" | "Weekly" | "Daily">(
     "Monthly"
   );
+  /* -------------------------------------- */
+
+  /* ---------------- CHART DATA (unchanged) ---------------- */
+  const kpi = [
+    { label: "My Balance", value: 0, delta: +0 },
+    { label: "Total Income", value: 0, delta: +0 },
+    { label: "Total Savings", value: 0, delta: -0 },
+    { label: "Total Expenses", value: 0, delta: -0 },
+  ];
+
+  const monthlyData = [
+    { name: "Jan", income: 3200, expense: 1600 },
+    { name: "Feb", income: 3000, expense: 1400 },
+    { name: "Mar", income: 3400, expense: 1150 },
+    { name: "Apr", income: 3500, expense: 1200 },
+    { name: "May", income: 3200, expense: 1550 },
+    { name: "Jun", income: 3800, expense: 1800 },
+    { name: "Jul", income: 3300, expense: 2100 },
+    { name: "Aug", income: 3200, expense: 1900 },
+    { name: "Sep", income: 3700, expense: 1500 },
+    { name: "Oct", income: 3600, expense: 1400 },
+    { name: "Nov", income: 3600, expense: 1200 },
+    { name: "Dec", income: 3400, expense: 1400 },
+  ];
+
+  const weeklyData = [
+    { name: "Week 1", income: 800, expense: 400 },
+    { name: "Week 2", income: 1000, expense: 500 },
+    { name: "Week 3", income: 800, expense: 400 },
+    { name: "Week 4", income: 1100, expense: 450 },
+  ];
+
+  const dailyData = [
+    { name: "Mon", income: 180, expense: 0 },
+    { name: "Tue", income: 170, expense: 0 },
+    { name: "Wed", income: 190, expense: 50 },
+    { name: "Thu", income: 180, expense: 50 },
+    { name: "Fri", income: 170, expense: 50 },
+    { name: "Sat", income: 0, expense: 200 },
+    { name: "Sun", income: 0, expense: 100 },
+  ];
+
+  const cashFlow = [
+    { name: "Salary", value: 6200 },
+    { name: "Expenses", value: 3865 },
+  ];
+
+  const tx = [
+    {
+      date: "10/12/25",
+      name: "Resturant",
+      type: "Cash",
+      category: "Food",
+      amount: -10.0,
+    },
+    {
+      date: "10/10/25",
+      name: "Resturant",
+      type: "Cash",
+      category: "Food",
+      amount: -50,
+    },
+    {
+      date: "10/10/25",
+      name: "Paycheck",
+      type: "Check",
+      category: "Paycheck",
+      amount: 7000,
+    },
+    {
+      date: "10/07/25",
+      name: "Share Market",
+      type: "Check",
+      category: "Business",
+      amount: 11000,
+    },
+    {
+      date: "10/06/25",
+      name: "Invest Money",
+      type: "Check",
+      category: "Business",
+      amount: 11000,
+    },
+  ];
+
+  const currency = (n: number) =>
+    n.toLocaleString(undefined, {
+      style: "currency",
+      currency: "USD",
+      maximumFractionDigits: 0,
+    });
+
   const totalCashFlow = useMemo(
     () => cashFlow.reduce((a, b) => a + b.value, 0),
     []
   );
+
   const COLORS = ["#6ec1e4", "#f5b971"];
 
   const chartData =
@@ -170,16 +190,13 @@ export default function Dashboard() {
       : period === "Weekly"
       ? weeklyData
       : monthlyData;
+  /* -------------------------------------- */
 
+  /* ---------------- DASHBOARD UI ---------------- */
   return (
     <Stack spacing={3}>
-      <Box
-        sx={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-        }}
-      >
+      {/* ---------------- TOP BAR ---------------- */}
+      <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
         <Box>
           <Typography variant="h4" fontWeight={800}>
             Dashboard
@@ -189,84 +206,70 @@ export default function Dashboard() {
           </Typography>
         </Box>
 
+        {/* RIGHT ICONS */}
         <Stack direction="row" spacing={1} alignItems="center">
-          <IconButton
-            sx={{
-              backgroundColor: "#fffff",
-              boxShadow: 1,
-              "&:hover": { backgroundColor: "#f5f5f5" },
-            }}
-          >
+          <IconButton>
             <SearchIcon />
           </IconButton>
 
-          <IconButton
-            sx={{
-              backgroundColor: "#fffff",
-              boxShadow: 1,
-              "&:hover": { backgroundColor: "#f5f5f5" },
-            }}
-          >
+          <IconButton>
             <NotificationsNoneIcon />
           </IconButton>
 
-          <Divider
-            orientation="vertical"
-            sx={{
-              bgcolor: "#ebecee",
-              height: 35,
-            }}
-          />
+          <Divider orientation="vertical" sx={{ height: 35 }} />
 
           <IconButton
-            onClick={handleMenuOpen}
-            sx={{
-              backgroundColor: "#fffff",
-              boxShadow: 1,
-              "&:hover": { backgroundColor: "#f5f5f5" },
+            onClick={(e) => {
+              if (!isLoggedIn) navigate("/login");
+              else handleMenuOpen(e);
             }}
           >
             <AccountCircle />
           </IconButton>
 
-          <Menu
-            anchorEl={anchorEl}
-            open={open}
-            onClose={handleMenuClose}
-            anchorOrigin={{
-              vertical: "bottom",
-              horizontal: "right",
-            }}
-            transformOrigin={{
-              vertical: "top",
-              horizontal: "right",
-            }}
+          {/* ACCOUNT MENU */}
+          <Menu 
+          anchorEl={anchorEl} 
+          open={open} 
+          onClose={handleMenuClose}
           >
-            <MenuItem
-              onClick={() => {
-                handleMenuClose();
-                navigate("/profile");
-              }}
-            >
-              Profile
-            </MenuItem>
 
-            <Divider orientation="horizontal" />
+            {/* If NOT logged in, show Login */}
+            {!isLoggedIn && (
+              <MenuItem
+                onClick={() => {
+                  handleMenuClose();
+                  navigate("/login");
+                }}
+              >
+                Login
+              </MenuItem>
+            )}
 
-            <MenuItem
-              onClick={() => {
-                handleMenuClose();
-                localStorage.removeItem("loggedIn");
-                localStorage.removeItem("displaName");
-                navigate("/login");
-              }}
-            >
-              Logout
-            </MenuItem>
+            {/* If logged in, show Profile */}
+            {isLoggedIn && (
+              <MenuItem
+                onClick={() => {
+                  handleMenuClose();
+                  navigate("/profile");
+                }}
+              >
+                Profile
+              </MenuItem>
+            )}
+
+            {/* If logged in, show Logout */}
+            {isLoggedIn && (
+              <>
+                <Divider />
+                <MenuItem onClick={handleLogout}>Logout</MenuItem>
+              </>
+            )}
           </Menu>
         </Stack>
       </Box>
 
+      {/* ---------------- KPI CARDS ---------------- */}
       <Grid container spacing={2}>
         {kpi.map((k) => {
           const up = k.delta >= 0;
@@ -280,9 +283,9 @@ export default function Dashboard() {
                       color={up ? "success" : "info"}
                       icon={up ? <ArrowDropUpIcon /> : <ArrowDropDownIcon />}
                       label={`${Math.abs(k.delta)}%`}
-                      sx={{ fontWeight: 700 }}
                     />
                   </Stack>
+
                   <Typography variant="subtitle2" color="text.secondary">
                     {k.label}
                   </Typography>
@@ -296,19 +299,16 @@ export default function Dashboard() {
         })}
       </Grid>
 
+      {/* ---------------- SUMMARY CHART ---------------- */}
       <Grid container spacing={2}>
         <Grid item xs={12} lg={8}>
           <Card variant="outlined" sx={{ borderRadius: 3 }}>
             <CardContent>
-              <Stack
-                direction="row"
-                alignItems="center"
-                justifyContent="space-between"
-                mb={1}
-              >
+              <Stack direction="row" justifyContent="space-between" mb={1}>
                 <Typography variant="subtitle1" fontWeight={700}>
                   Summary
                 </Typography>
+
                 <ToggleButtonGroup
                   size="small"
                   value={period}
@@ -323,40 +323,14 @@ export default function Dashboard() {
 
               <Box sx={{ width: "100%", height: 280 }}>
                 <ResponsiveContainer>
-                  <LineChart
-                    data={chartData}
-                    margin={{ top: 10, right: 20, left: -10, bottom: 0 }}
-                  >
+                  <LineChart data={chartData}>
                     <CartesianGrid strokeDasharray="3 3" vertical={false} />
                     <XAxis dataKey="name" />
-                    <YAxis
-                      tickFormatter={(v) =>
-                        v >= 1000 ? `$${v / 1000}k` : `$${v}`
-                      }
-                    />
-                    <Tooltip
-                      formatter={(value: number) => currency(value)}
-                      labelFormatter={(label) => label}
-                    />
+                    <YAxis />
+                    <Tooltip formatter={(v: number) => currency(v)} />
                     <Legend />
-                    <Line
-                      type="monotoneX"
-                      dataKey="income"
-                      name="Income"
-                      stroke="#6ec1e4"
-                      strokeWidth={3}
-                      dot={false}
-                      activeDot={{ r: 6 }}
-                    />
-                    <Line
-                      type="monotoneX"
-                      dataKey="expense"
-                      name="Expenses"
-                      stroke="#f5b971"
-                      strokeWidth={3}
-                      dot={false}
-                      activeDot={{ r: 6 }}
-                    />
+                    <Line dataKey="income" name="Income" stroke="#6ec1e4" strokeWidth={3} dot={false} />
+                    <Line dataKey="expense" name="Expenses" stroke="#f5b971" strokeWidth={3} dot={false} />
                   </LineChart>
                 </ResponsiveContainer>
               </Box>
@@ -364,14 +338,11 @@ export default function Dashboard() {
           </Card>
         </Grid>
 
+        {/* ---------------- PIE CHART CARD ---------------- */}
         <Grid item xs={12} lg={4}>
           <Card variant="outlined" sx={{ borderRadius: 3, height: "100%" }}>
             <CardContent>
-              <Stack
-                direction="row"
-                justifyContent="space-between"
-                alignItems="center"
-              >
+              <Stack direction="row" justifyContent="space-between">
                 <Typography variant="subtitle1" fontWeight={700}>
                   Cash Flow
                 </Typography>
@@ -379,27 +350,6 @@ export default function Dashboard() {
                   <MenuItem value="Last Month">Last Month</MenuItem>
                 </Select>
               </Stack>
-
-              <Grid container spacing={2} mt={1}>
-                <Grid item xs={4}>
-                  <Typography variant="body2" color="text.secondary">
-                    Daily
-                  </Typography>
-                  <Typography fontWeight={800}>$3,296</Typography>
-                </Grid>
-                <Grid item xs={4}>
-                  <Typography variant="body2" color="text.secondary">
-                    Weekly
-                  </Typography>
-                  <Typography fontWeight={800}>$5,840</Typography>
-                </Grid>
-                <Grid item xs={4}>
-                  <Typography variant="body2" color="text.secondary">
-                    Monthly
-                  </Typography>
-                  <Typography fontWeight={800}>$8,396</Typography>
-                </Grid>
-              </Grid>
 
               <Box sx={{ width: "100%", height: 240 }}>
                 <ResponsiveContainer>
@@ -410,76 +360,41 @@ export default function Dashboard() {
                       nameKey="name"
                       innerRadius={70}
                       outerRadius={100}
-                      paddingAngle={2}
                     >
                       {cashFlow.map((_, i) => (
                         <Cell key={i} fill={COLORS[i % COLORS.length]} />
                       ))}
                     </Pie>
+
                     <Tooltip formatter={(v: number) => currency(v)} />
                   </PieChart>
                 </ResponsiveContainer>
               </Box>
 
-              <Stack
-                direction="row"
-                justifyContent="center"
-                alignItems="center"
-                spacing={1}
-                mt={-1}
-                mb={1}
-              >
-                <Typography variant="caption" color="text.secondary">
-                  Total
-                </Typography>
+              <Stack direction="row" justifyContent="center" spacing={1}>
+                <Typography variant="caption">Total</Typography>
                 <Typography fontWeight={800}>
                   {currency(totalCashFlow)}
                 </Typography>
-              </Stack>
-
-              <Stack direction="row" spacing={2} justifyContent="center">
-                <Stack direction="row" spacing={1} alignItems="center">
-                  <Box
-                    sx={{
-                      width: 10,
-                      height: 10,
-                      borderRadius: "50%",
-                      bgcolor: COLORS[0],
-                    }}
-                  />
-                  <Typography variant="caption">Salary</Typography>
-                </Stack>
-                <Stack direction="row" spacing={1} alignItems="center">
-                  <Box
-                    sx={{
-                      width: 10,
-                      height: 10,
-                      borderRadius: "50%",
-                      bgcolor: COLORS[1],
-                    }}
-                  />
-                  <Typography variant="caption">Expenses</Typography>
-                </Stack>
               </Stack>
             </CardContent>
           </Card>
         </Grid>
       </Grid>
 
+      {/* ---------------- TRANSACTIONS TABLE ---------------- */}
       <Card variant="outlined" sx={{ borderRadius: 3 }}>
         <CardContent>
-          <Stack
-            direction="row"
-            alignItems="center"
-            justifyContent="space-between"
-            mb={1}
-          >
+          <Stack direction="row" justifyContent="space-between" mb={1}>
             <Typography variant="h6">Latest Transactions</Typography>
+
             <Select size="small" value="April" disabled>
               <MenuItem value="April">April</MenuItem>
             </Select>
           </Stack>
+
           <Divider sx={{ mb: 1 }} />
+
           <Table size="small">
             <TableHead>
               <TableRow>
@@ -490,12 +405,14 @@ export default function Dashboard() {
                 <TableCell align="right">Amount</TableCell>
               </TableRow>
             </TableHead>
+
             <TableBody>
               {tx.map((t, idx) => (
                 <TableRow key={idx} hover>
                   <TableCell>{t.date}</TableCell>
                   <TableCell>{t.name}</TableCell>
                   <TableCell>{t.type}</TableCell>
+
                   <TableCell>
                     <Typography
                       sx={{
@@ -506,6 +423,7 @@ export default function Dashboard() {
                       {t.category}
                     </Typography>
                   </TableCell>
+
                   <TableCell
                     align="right"
                     sx={{

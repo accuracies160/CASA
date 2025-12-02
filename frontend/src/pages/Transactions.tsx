@@ -1,4 +1,8 @@
-import { useMemo, useState } from "react";
+// -----------------------------------------------------
+//  IMPORTS
+//  Responsibility: UI components, charts, utilities, API
+// -----------------------------------------------------
+import { useMemo, useState, useEffect} from "react";
 import {
   Box,
   Stack,
@@ -31,8 +35,16 @@ import ArrowDownwardIcon from "@mui/icons-material/ArrowDownward";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import PendingIcon from "@mui/icons-material/AccessTime";
 import FileDownloadIcon from "@mui/icons-material/FileDownload";
+
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer, Legend } from "recharts";
 
+import axios from "axios";
+import UploadCSV from "../components/UploadCSV";
+import { Description } from "@mui/icons-material";
+
+// -----------------------------------------------------
+// CONSTANTS
+// -----------------------------------------------------
 const COLORS = ["#6ec1e4", "#f5b971", "#9ccc65", "#ba68c8", "#ff8a65"];
 
 const currency = (n: number) =>
@@ -42,16 +54,20 @@ const currency = (n: number) =>
     maximumFractionDigits: 2,
   });
 
+// -----------------------------------------------------
+// Main Componenet
+// -----------------------------------------------------
 export default function TransactionsPlus() {
-  const [transactions, setTransactions] = useState([
-    { id: 1, name: "ABC Company", category: "Salary", account: "Checking", date: "2024-12-15", status: "completed", amount: 3200, type: "income" },
-    { id: 2, name: "Freelance Project", category: "Freelance", account: "Checking", date: "2024-12-12", status: "completed", amount: 3200, type: "income" },
-    { id: 3, name: "Netflix Subscription", category: "Entertainment", account: "Credit Card", date: "2024-12-10", status: "pending", amount: -850, type: "expense" },
-    { id: 4, name: "Online Store Payment", category: "Side Business", account: "PayPal", date: "2024-12-08", status: "pending", amount: 450, type: "income" },
-    { id: 5, name: "Stock Dividends", category: "Investments", account: "Investment", date: "2024-12-10", status: "completed", amount: 3200, type: "income" },
-    { id: 6, name: "Electric Bill", category: "Utilities", account: "Checking", date: "2024-12-12", status: "completed", amount: -850, type: "expense" },
-  ]);
 
+  // -----------------------------------------------------
+  // Transactions Data
+  // -----------------------------------------------------
+  const [transactions, setTransactions] = useState<any[]>([]);
+
+
+  // -----------------------------------------------------
+  // Filters and Sorting
+  // -----------------------------------------------------
   const [breakdown, setBreakdown] = useState("By Category");
   const [dateRange, setDateRange] = useState("This Year");
   const [search, setSearch] = useState("");
@@ -59,8 +75,15 @@ export default function TransactionsPlus() {
   const [sortBy, setSortBy] = useState<keyof typeof transactions[0]>("date");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
 
+  // -----------------------------------------------------
+  // UI Controls
+  // -----------------------------------------------------
   const [openModal, setOpenModal] = useState(false);
   const [snackbarOpen, setSnackbarOpen] = useState(false);
+
+  // -----------------------------------------------------
+  // New Transaction Form
+  // -----------------------------------------------------
 
   const [newTx, setNewTx] = useState({
     name: "",
@@ -72,30 +95,95 @@ export default function TransactionsPlus() {
     status: "pending",
   });
 
-  const handleAddTransaction = () => {
+  // -----------------------------------------------------
+  // Fetch Transactions from backend on page load
+  // -----------------------------------------------------
+
+  useEffect(() => {
+    const fetchTx = async () => {
+      try {
+        const token = localStorage.getItem("token");
+
+        const res = await axios.get("http://localhost:8080/api/transactions", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
+        const transformed = res.data.map((t: any, index: number) => ({
+          id: index + 1,
+          name: t.description,
+          category: t.category,
+          account: "Bank",
+          date: t.date,
+          status: "completed",
+          amount: t.amount,
+          type: t.amount >= 0 ? "income" : "expense",
+        }));
+
+        setTransactions(transformed);
+      } catch (err) {
+        console.error("Failed to fetch transactions:", err);
+      }
+    };
+
+    fetchTx();
+  }, []);
+
+  // -----------------------------------------------------
+  //  ADD NEW TRANSACTION MANUALLY
+  // -----------------------------------------------------
+  const handleAddTransaction = async () => {
     const parsedAmount = Number(newTx.amount);
+
+    // Validation
     if (!newTx.name || !newTx.category || isNaN(parsedAmount)) {
       alert("Please fill all required fields correctly.");
       return;
     }
 
-    const tx = {
-      id: transactions.length + 1,
-      name: newTx.name,
-      category: newTx.category,
-      account: newTx.account || "N/A",
-      date: newTx.date || new Date().toISOString().split("T")[0],
-      status: newTx.status,
-      type: newTx.type,
-      amount: newTx.type === "expense" ? -Math.abs(parsedAmount) : Math.abs(parsedAmount),
-    };
+    try {
+      const token = localStorage.getItem("token");
 
-    setTransactions((prev) => [...prev, tx]);
-    setStatusFilter("All"); // ✅ Always show all transactions after adding
-    setOpenModal(false);
-    setSnackbarOpen(true);
+      // Backend transaction shape
+        const txToSave = {
+          description: newTx.name,
+          category: newTx.category,
+          date: newTx.date || new Date().toISOString().split("T")[0],
+          amount: newTx.type === "expense" ? -Math.abs(parsedAmount) : Math.abs(parsedAmount),
+        }; 
 
-    // Reset the form
+      // Send to backend
+      await axios.post(
+        "http://localhost:8080/api/transactions/add",
+        txToSave,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      // Refresh transaction list from backend
+      const res = await axios.get("http://localhost:8080/api/transactions", {
+          headers: { Authorization: `Bearer ${token}` },
+      });
+
+      const transformed = res.data.map((t: any, index: number) => ({
+        id: index + 1,
+        name: t.description,
+        category: t.category,
+        account: "Bank",
+        date: t.date,
+        status: "completed",
+        amount: t.amount,
+        type: t.amount >= 0 ? "income" : "expense",
+      }));
+
+      setTransactions(transformed);
+      setSnackbarOpen(true);
+      setOpenModal(false);
+
+    } catch (err) {
+      console.error("Failed to save transaction:", err);
+      alert("Failed to save transaction.");
+    }
+
+    // Clear form
     setNewTx({
       name: "",
       category: "",
@@ -231,8 +319,7 @@ export default function TransactionsPlus() {
         </Grid>
       </Grid>
 
-      
-
+    
       {/* Transactions Table */}
       <Card variant="outlined" sx={{ borderRadius: 3 }}>
         <CardContent>
@@ -240,9 +327,13 @@ export default function TransactionsPlus() {
             <Typography variant="h6">All Transactions</Typography>
             <Stack direction="row" spacing={2}>
               <TextField size="small" placeholder="Search transactions..." value={search} onChange={(e) => setSearch(e.target.value)} />
+
               <Button variant="contained" startIcon={<FileDownloadIcon />} color="primary">
                 Export
               </Button>
+
+              <UploadCSV onUploadComplete={() => window.location.reload()} />
+
               <Button variant="contained" color="inherit" onClick={() => setOpenModal(true)}>
                 + Add Transaction
               </Button>

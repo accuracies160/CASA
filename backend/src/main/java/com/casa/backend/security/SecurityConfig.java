@@ -42,8 +42,8 @@ public class SecurityConfig {
         .csrf(csrf -> csrf.disable())
         .cors(cors -> {})   // CORS by CorsConfig
         .authorizeHttpRequests(auth -> auth
-            .requestMatchers("/api/auth/**").permitAll()
-            .anyRequest().authenticated()
+            .requestMatchers("/api/auth/**").permitAll()  // only auth is public
+            .anyRequest().authenticated()                // everything else requires login
         );
     return http.build();
     }
