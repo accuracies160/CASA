@@ -29,6 +29,8 @@ services:
       SPRING_DATASOURCE_PASSWORD: ${MYSQL_PASSWORD}
       JWT_SECRET: ${JWT_SECRET}
       SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE}
+    volumes:
+      - ./backend/.env:/app/.env
     ports:
       - "8080:8080"
 
