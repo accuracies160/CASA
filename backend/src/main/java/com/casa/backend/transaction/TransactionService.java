@@ -9,6 +9,7 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 @Service
@@ -16,6 +17,12 @@ import java.util.List;
 public class TransactionService {
 
     private final TransactionRepository transactionRepository;
+
+    /**
+     * Custom CSV date format: MM/dd/yyyy
+     * Example: 12/03/2025
+     */
+    private final DateTimeFormatter csvFormatter = DateTimeFormatter.ofPattern("MM/dd/yyyy");
 
     /**
      * Saves a single transaction for a given user.
@@ -34,17 +41,26 @@ public class TransactionService {
     /**
      * Processes and saves transactions from a CSV file.
      * Expected CSV format:
-     * date, description, category, amount
-     * 2025-01-01, Starbucks, Food, -4.75
+     * MM/dd/yyyy, Starbucks, Food, -4.75
      */
     public void processCSV(MultipartFile file, User user) {
         try (BufferedReader br = new BufferedReader(new InputStreamReader(file.getInputStream()))) {
-            String line = br.readLine();
+            
+            String line = br.readLine(); // skip header line
 
             while ((line = br.readLine()) != null) {
-                String [] fields = line.split(",");
+                String[] fields = line.split(",");
 
-                Transaction t = Transaction.builder().user(user).date(LocalDate.parse(fields[0].trim())).description(fields[1].trim()).category(fields[2].trim()).amount(new BigDecimal(fields[3].trim())).build();
+                // Parse CSV date using custom formatter
+                LocalDate date = LocalDate.parse(fields[0].trim(), csvFormatter);
+
+                Transaction t = Transaction.builder()
+                        .user(user)
+                        .date(date)
+                        .description(fields[1].trim())
+                        .category(fields[2].trim())
+                        .amount(new BigDecimal(fields[3].trim()))
+                        .build();
 
                 transactionRepository.save(t);
             }
