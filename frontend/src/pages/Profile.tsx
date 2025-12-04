@@ -1,8 +1,147 @@
+<<<<<<< Updated upstream
 import { Typography, Box } from "@mui/material";
 export default function Profile() {
   return (
     <Box>
       <Typography variant="h4">Profile</Typography>
+=======
+import { useMemo, useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import {
+  Box,
+  Typography,
+  Paper,
+  Divider,
+  Stack,
+  Button,
+  Drawer,
+} from "@mui/material";
+
+import PersonOutlineIcon from "@mui/icons-material/PersonOutline";
+import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos"
+import EditIcon from '@mui/icons-material/Edit';
+
+export default function Profile() {
+  const firstName = localStorage.getItem("firstName");
+  const lastName = localStorage.getItem("lastName");
+  const email = localStorage.getItem("email");
+
+
+    /* ---------------- Pop Up Panel ---------------- */
+    const [selectedPanel, setSelectedPanel] = useState<string | null>(null);
+
+  return (
+    <Box p={4}>
+      <Typography variant="h4" fontWeight={700}>
+        Profile
+      </Typography>
+
+      <Box
+      sx = {{
+        display: "flex",
+        gap: 3,
+        mt: 2,
+      }}
+      >
+        <Paper
+          sx={{
+            width: "fit-content",
+            flexShrink: 0,
+            p: 3,
+            borderRadius: "16px",
+            boxShadow: 5,
+          }}
+        >
+          <Typography variant="h5" mb={1}>
+            Welcome, {firstName} {lastName}
+          </Typography>
+
+          <Divider />
+
+          <Stack direction="column" spacing={1} alignItems="flex-start" mt={2}>
+            <Button
+            fullWidth
+            sx = {{
+              textTransform: "none",
+              px: 1.5,
+              height: "50px",
+              color: "#000",
+            }}
+            onClick = {() => setSelectedPanel("profile")}
+            >
+              <Box
+              sx = {{
+                display: "flex",
+                width: "100%",
+                alignItems: "center",
+                justifyContent: "space-between",
+              }}
+              >
+                <Box
+                sx = {{
+                  display: "flex", 
+                  alignItems: "center", 
+                  gap: 1.2
+                }}
+                >
+                  <PersonOutlineIcon />
+                  <Typography> My Profile </Typography>
+                </Box>
+
+                <ArrowForwardIosIcon sx = {{ fontSize: 14 }} />
+              </Box>
+            </Button>
+
+            {/* Add more buttons here later the same way */}
+          </Stack>
+        </Paper>
+
+        {/* ---------------------------------------------------------
+           RIGHT SIDE — Detail Panel
+           Appears ONLY when selectedPanel has a value.
+           --------------------------------------------------------- */}
+
+           {selectedPanel === "profile" && (
+            <Paper
+            sx = {{
+              width: "40%",
+              p: 3,
+              borderRadius: "16px",
+              boxShadow: 5,
+            }}
+            >
+              <Typography variant="h5" mb={2}>
+                My Profile
+              </Typography>
+
+              <Divider sx = {{ mb: 2 }} />
+
+              <Typography variant="body1">
+                Name: {firstName} {lastName}
+              </Typography>
+
+              <Divider sx = {{ mt: 1 }} />
+
+              <Typography variant="body1" mt={1}>
+                Email: {email}
+              </Typography>
+
+              <Divider sx = {{ mt: 1 }} />
+
+              <Typography variant="body1" mt={1}>
+                Password:
+              </Typography>
+
+              <Divider sx = {{ mt: 1 }} />
+
+              <Typography variant="body1" mt={1}>
+                Blank
+              </Typography>
+            </Paper>
+           )}
+
+      </Box>
+>>>>>>> Stashed changes
     </Box>
   );
 }
