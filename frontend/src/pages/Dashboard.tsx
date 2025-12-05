@@ -43,21 +43,51 @@ import AccountCircle from "@mui/icons-material/AccountCircle";
 export default function Dashboard() {
   const navigate = useNavigate();
 
+  // Fetch Transactions
+  const [transactions, setTransactions] = useState([]);
+
+  async function fetchUserData() {
+    try {
+      const res = await fetch("http://localhost:8080/api/transactions", {
+        method: "GET",
+        credentials: "include",
+      });
+
+      if (!res.ok ) return;
+
+      const data = await res.json();
+      setTransactions(data);
+    } catch (err) {
+      console.error("Failed to fetch user data", err);
+    }
+  }
+
   /* ---------------- LOGIN STATE ---------------- */
-  const [isLoggedIn, setIsLoggedIn] = useState(
-    Boolean(localStorage.getItem("loggedIn"))
-  );
+  const[isLoggedIn, setIsLoggedIn] = useState(false);
+
+  const [checkingAuth, setCheckingAuth] = useState(true);
+
 
   useEffect(() => {
     const loggedIn = localStorage.getItem("loggedIn");
-    const displayName = localStorage.getItem("displayName");
+    const email = localStorage.getItem("email");
 
-    if (loggedIn && (!displayName || displayName.trim() === "")) {
-      localStorage.removeItem("loggedIn");
-      localStorage.removeItem("displayName");
-      setIsLoggedIn(false);
-    }
+    setIsLoggedIn(Boolean(loggedIn && email));
+    setCheckingAuth(false);
   }, []);
+
+  useEffect(() =>{
+    if(!checkingAuth && !isLoggedIn) {
+      setTransactions([]);
+      navigate("/dashboard"); // Change to "/login" in future
+    }
+  }, [checkingAuth, isLoggedIn, navigate]);
+
+  useEffect(() => {
+    if(isLoggedIn) {
+      fetchUserData();
+    }
+  }, [isLoggedIn]);
 
   /* ---------------- MENU ---------------- */
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
@@ -73,8 +103,9 @@ export default function Dashboard() {
 
   const handleLogout = () => {
     handleMenuClose();
-    localStorage.removeItem("loggedIn");
-    localStorage.removeItem("displayName");
+    localStorage.clear();
+    setTransactions([]);
+
     setIsLoggedIn(false);
     navigate("/login");
   };
@@ -87,88 +118,8 @@ export default function Dashboard() {
   );
   /* -------------------------------------- */
 
-  /* ---------------- CHART DATA (unchanged) ---------------- */
-  const kpi = [
-    { label: "My Balance", value: 0, delta: +0 },
-    { label: "Total Income", value: 0, delta: +0 },
-    { label: "Total Savings", value: 0, delta: -0 },
-    { label: "Total Expenses", value: 0, delta: -0 },
-  ];
-
-  const monthlyData = [
-    { name: "Jan", income: 3200, expense: 1600 },
-    { name: "Feb", income: 3000, expense: 1400 },
-    { name: "Mar", income: 3400, expense: 1150 },
-    { name: "Apr", income: 3500, expense: 1200 },
-    { name: "May", income: 3200, expense: 1550 },
-    { name: "Jun", income: 3800, expense: 1800 },
-    { name: "Jul", income: 3300, expense: 2100 },
-    { name: "Aug", income: 3200, expense: 1900 },
-    { name: "Sep", income: 3700, expense: 1500 },
-    { name: "Oct", income: 3600, expense: 1400 },
-    { name: "Nov", income: 3600, expense: 1200 },
-    { name: "Dec", income: 3400, expense: 1400 },
-  ];
-
-  const weeklyData = [
-    { name: "Week 1", income: 800, expense: 400 },
-    { name: "Week 2", income: 1000, expense: 500 },
-    { name: "Week 3", income: 800, expense: 400 },
-    { name: "Week 4", income: 1100, expense: 450 },
-  ];
-
-  const dailyData = [
-    { name: "Mon", income: 180, expense: 0 },
-    { name: "Tue", income: 170, expense: 0 },
-    { name: "Wed", income: 190, expense: 50 },
-    { name: "Thu", income: 180, expense: 50 },
-    { name: "Fri", income: 170, expense: 50 },
-    { name: "Sat", income: 0, expense: 200 },
-    { name: "Sun", income: 0, expense: 100 },
-  ];
-
-  const cashFlow = [
-    { name: "Salary", value: 6200 },
-    { name: "Expenses", value: 3865 },
-  ];
-
-  const tx = [
-    {
-      date: "10/12/25",
-      name: "Resturant",
-      type: "Cash",
-      category: "Food",
-      amount: -10.0,
-    },
-    {
-      date: "10/10/25",
-      name: "Resturant",
-      type: "Cash",
-      category: "Food",
-      amount: -50,
-    },
-    {
-      date: "10/10/25",
-      name: "Paycheck",
-      type: "Check",
-      category: "Paycheck",
-      amount: 7000,
-    },
-    {
-      date: "10/07/25",
-      name: "Share Market",
-      type: "Check",
-      category: "Business",
-      amount: 11000,
-    },
-    {
-      date: "10/06/25",
-      name: "Invest Money",
-      type: "Check",
-      category: "Business",
-      amount: 11000,
-    },
-  ];
+  /* ---------------- CHART DATA ---------------- */
+  const COLORS = ["#6ec1e4", "#f5b971"];
 
   const currency = (n: number) =>
     n.toLocaleString(undefined, {
@@ -177,20 +128,65 @@ export default function Dashboard() {
       maximumFractionDigits: 0,
     });
 
-  const totalCashFlow = useMemo(
-    () => cashFlow.reduce((a, b) => a + b.value, 0),
-    []
-  );
+    const totalIncome = useMemo(() => {
+      return transactions
+      .filter(t => t.amount > 0)
+      .reduce((sum, t) => sum + t.amount, 0);
+  }, [transactions]);
 
-  const COLORS = ["#6ec1e4", "#f5b971"];
+  const totalExpenses = useMemo(() => {
+    return transactions
+      .filter(t => t.amount < 0)
+      .reduce((sum, t) => sum + Math.abs(t.amount), 0);
+  }, [transactions]);
+  
+  const balance = useMemo(() => {
+    return totalIncome - totalExpenses;
+  }, [totalIncome, totalExpenses]);
 
-  const chartData =
-    period === "Daily"
-      ? dailyData
-      : period === "Weekly"
-      ? weeklyData
-      : monthlyData;
+  const kpi = [
+    { label: "My Balance", value: balance, delta: +0 },
+    { label: "Total Income", value: totalIncome, delta: +0 },
+    { label: "Total Expenses", value: totalExpenses, delta: -0 },
+  ];
+
+  const cashFlow = [
+    { name: "Income", value: totalIncome},
+    { name: "Expenses", value: totalExpenses},
+  ]
+
+  const totalCashFlow = totalIncome + totalExpenses;
+
+  const chartData = useMemo(() => {
+    const months = [
+      "Jan","Feb","Mar","Apr","May","Jun",
+      "Jul","Aug","Sep","Oct","Nov","Dec"
+    ];
+  
+    // Start with all months = 0
+    const monthly = {};
+    months.forEach(m => {
+      monthly[m] = { name: m, income: 0, expense: 0 };
+    });
+  
+    // Fill in real data
+    transactions.forEach(t => {
+      const month = new Date(t.date).toLocaleString("en-US", { month: "short" });
+  
+      if (t.amount > 0) {
+        monthly[month].income += t.amount;
+      } else {
+        monthly[month].expense += Math.abs(t.amount);
+      }
+    });
+  
+    return Object.values(monthly);
+  }, [transactions]);
+  
+
   /* -------------------------------------- */
+
+  if (checkingAuth) return null;
 
   /* ---------------- DASHBOARD UI ---------------- */
   return (
@@ -407,34 +403,34 @@ export default function Dashboard() {
             </TableHead>
 
             <TableBody>
-              {tx.map((t, idx) => (
+              {transactions.slice(0, 5).map((t, idx) => (
                 <TableRow key={idx} hover>
                   <TableCell>{t.date}</TableCell>
-                  <TableCell>{t.name}</TableCell>
-                  <TableCell>{t.type}</TableCell>
+                  <TableCell>{t.description}</TableCell>
+
+                  <TableCell>{t.amount >= 0 ? "Income" : "Expense"}</TableCell>
 
                   <TableCell>
                     <Typography
-                      sx={{
-                        color: t.category === "Food" ? "orange" : "skyblue",
-                        fontWeight: 600,
-                      }}
+                    sx = {{
+                      color: t.category === "Food" ? "orange" : "skyblue",
+                      fontWeight: 600,
+                    }}
                     >
                       {t.category}
                     </Typography>
                   </TableCell>
 
                   <TableCell
-                    align="right"
-                    sx={{
-                      color: t.amount < 0 ? "error.main" : "success.main",
-                      fontWeight: 700,
-                    }}
+                  align="right"
+                  sx = {{
+                    color: t.amount < 0 ? "error.main" : "success.main",
+                    fontWeight: 700,
+                  }}
                   >
-                    {t.amount < 0 ? "-" : ""}
                     {currency(Math.abs(t.amount))}
                   </TableCell>
-                </TableRow>
+                  </TableRow>
               ))}
             </TableBody>
           </Table>

@@ -7,11 +7,13 @@ import org.springframework.security.config.annotation.authentication.configurati
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
 
 import com.casa.backend.user.UserRepository;
 
@@ -38,14 +40,20 @@ public class SecurityConfig {
      */
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-    http
-        .csrf(csrf -> csrf.disable())
-        .cors(cors -> {})   // CORS by CorsConfig
-        .authorizeHttpRequests(auth -> auth
-            .requestMatchers("/api/auth/**").permitAll()  // only auth is public
-            .anyRequest().authenticated()                // everything else requires login
-        );
-    return http.build();
+        http
+            .csrf(csrf -> csrf.disable())
+            .cors(cors -> {})   // CORS by CorsConfig
+            .authorizeHttpRequests(auth -> auth
+                .requestMatchers("/api/auth/**").permitAll()  // only auth is public
+                .anyRequest().authenticated()                // everything else requires login
+            )
+            .sessionManagement(session -> session
+                .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
+            )
+            .securityContext(context -> context
+                .securityContextRepository(new HttpSessionSecurityContextRepository())
+            );
+        return http.build();
     }
     
     @Bean
@@ -68,5 +76,17 @@ public class SecurityConfig {
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
+    }
+
+    /**
+     * Provides the AuthenticationManager bean needed for manual authentication.
+     * 
+     * @param config The AuthenticationConfiguration
+     * @return AuthenticationManager instance
+     * @throws Exception if unable to get the authentication manager
+     */
+    @Bean
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
+        return config.getAuthenticationManager();
     }
 }

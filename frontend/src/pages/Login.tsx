@@ -6,27 +6,36 @@ export default function Login() {
   const [password, setPassword] = useState("");
   const [message, setMessage] = useState("");
 
-  async function handleLogin(e: React.FormEvent) {
+  async function handleLogin(e) {
     e.preventDefault();
 
     try {
       const res = await fetch("http://localhost:8080/api/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify({ email, password }),
       });
 
+      // -------------------------------
+      // SUCCESSFUL LOGIN
+      // -------------------------------
       if (res.ok) {
-        const message = await res.text();
-        const displayName = message.replace("Login successful for user: ", "");
+        const data = await res.json(); // JSON { firstName, lastName, email }
 
+        // Store the new user info
         localStorage.setItem("loggedIn", "true");
-        localStorage.setItem("displayName", displayName);
+        localStorage.setItem("firstName", data.firstName);
+        localStorage.setItem("lastName", data.lastName);
+        localStorage.setItem("email", data.email);
 
         window.location.href = "/dashboard";
         return;
       }
 
+      // -------------------------------
+      // FAILED LOGIN
+      // -------------------------------
       const text = await res.text();
       setMessage(text);
 
@@ -59,7 +68,6 @@ export default function Login() {
           variant="h6"
           fontWeight="bold"
           mb={2}
-          fontFamily="'Open Sans', sans-serif"
           textAlign="center"
           fontSize="28px"
         >
@@ -98,18 +106,19 @@ export default function Login() {
           <Typography
             variant="body2"
             sx={{ mt: 2, textAlign: "center", cursor: "pointer" }}
-            onClick={() => window.location.href = "/signup"}
+            onClick={() => (window.location.href = "/signup")}
           >
-          Don’t have an account? <span style={{ color: "#1976d2" }}>Sign up</span>
+            Don’t have an account?{" "}
+            <span style={{ color: "#1976d2" }}>Sign up</span>
           </Typography>
-
         </Stack>
 
-        <Typography mt={2} 
-        textAlign="center"
-        sx = {{
-          color: message.includes("Succssful") ? "green" : "red",
-        }}
+        <Typography
+          mt={2}
+          textAlign="center"
+          sx={{
+            color: message.includes("Success") ? "green" : "red",
+          }}
         >
           {message}
         </Typography>

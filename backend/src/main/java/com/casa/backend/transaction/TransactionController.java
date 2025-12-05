@@ -44,6 +44,21 @@ public class TransactionController {
             return ResponseEntity.ok("Transaction saved successfully.");
         }
 
+        @DeleteMapping("/{id}")
+        public ResponseEntity<?> deleteTransaction(@PathVariable Long id, Principal principal) {
+            User user = userService.getByEmail(principal.getName());
+
+            // Checks if the transaction belongs to the user
+            Transaction tx = transactionService.getTransactionById(id);
+            if (tx == null || !tx.getUser().getId().equals(user.getId())) {
+                return ResponseEntity.status(403).body("Unauthorized or not found");
+            }
+
+            transactionService.deleteTransaction(id);
+
+            return ResponseEntity.ok("Deleted");
+            }
+
         /**
          * Returns all transactions for the logged-in user.
          */

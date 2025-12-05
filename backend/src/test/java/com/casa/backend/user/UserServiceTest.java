@@ -1,59 +1,46 @@
 package com.casa.backend.user;
 
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
-import org.mockito.InjectMocks;
-import org.mockito.junit.jupiter.MockitoExtension;
-
-import java.util.Optional;
+import org.mockito.Mockito;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-@ExtendWith(MockitoExtension.class)
 class UserServiceTest {
 
-    @Mock
-    private UserRepository userRepository;
-
-    @InjectMocks
-    private UserService userService;
-
-    // Test 1: User exists
     @Test
-    void returns_user_when_found() {
-        User u = User.builder()
-                .id(1L)
-                .email("test@example.com")
+    void getByEmail_returnsUser() {
+        UserRepository mockRepo = mock(UserRepository.class);
+
+        User user = User.builder()
+                .firstName("John")
+                .lastName("Doe")
+                .email("test@test.com")
                 .passwordHash("hashed")
-                .displayName("John")
                 .build();
 
-        when(userRepository.findByEmail("test@example.com"))
-                .thenReturn(Optional.of(u));
+        when(mockRepo.findByEmail("test@test.com"))
+                .thenReturn(java.util.Optional.of(user));
 
-        User result = userService.getByEmail("test@example.com");
+        UserService service = new UserService(mockRepo);
 
-        assertEquals("test@example.com", result.getEmail());
-        assertEquals("John", result.getDisplayName());
+        User result = service.getByEmail("test@test.com");
 
-        verify(userRepository, times(1)).findByEmail("test@example.com");
+        assertNotNull(result);
+        assertEquals("John", result.getFirstName());
+        assertEquals("Doe", result.getLastName());
+        assertEquals("test@test.com", result.getEmail());
     }
-    
-    // Test 2: User not found
+
     @Test
-    void throws_exception_when_user_not_found() {
+    void getByEmail_throwsException_whenUserNotFound() {
+        UserRepository mockRepo = mock(UserRepository.class);
+        when(mockRepo.findByEmail("missing@test.com"))
+                .thenReturn(java.util.Optional.empty());
 
-        when(userRepository.findByEmail("missing@example.com"))
-                .thenReturn(Optional.empty());
+        UserService service = new UserService(mockRepo);
 
-        RuntimeException ex = assertThrows(
-                RuntimeException.class,
-                () -> userService.getByEmail("missing@example.com")
-        );
-
-        assertTrue(ex.getMessage().contains("User not found"));
-        verify(userRepository, times(1)).findByEmail("missing@example.com");
+        assertThrows(RuntimeException.class,
+                () -> service.getByEmail("missing@test.com"));
     }
 }

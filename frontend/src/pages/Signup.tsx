@@ -4,12 +4,15 @@ import { useNavigate } from "react-router-dom";
 
 export default function Signup() {
   const navigate = useNavigate();
-  const [email, setEmail] = useState("");
-  const [displayName, setDisplayName] = useState("");
-  const [password, setPassword] = useState("");
-  const [message, setMessage] = useState("");
 
-  async function handleSignup(e: React.FormEvent) {
+  // NEW STATE VALUES
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName]   = useState("");
+  const [email, setEmail]         = useState("");
+  const [password, setPassword]   = useState("");
+  const [message, setMessage]     = useState("");
+
+  async function handleSignup(e) {
     e.preventDefault();
 
     try {
@@ -17,8 +20,9 @@ export default function Signup() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
+          firstName,
+          lastName,
           email,
-          displayName,
           password
         }),
       });
@@ -58,7 +62,6 @@ export default function Signup() {
           variant="h6"
           fontWeight="bold"
           mb={2}
-          fontFamily="'Open Sans', sans-serif"
           textAlign="center"
           fontSize="28px"
         >
@@ -66,13 +69,24 @@ export default function Signup() {
         </Typography>
 
         <Stack spacing={2}>
+
+          {/* FIRST NAME */}
           <TextField
-            label="Display Name"
+            label="First Name"
             fullWidth
-            value={displayName}
-            onChange={(e) => setDisplayName(e.target.value)}
+            value={firstName}
+            onChange={(e) => setFirstName(e.target.value)}
           />
 
+          {/* LAST NAME */}
+          <TextField
+            label="Last Name"
+            fullWidth
+            value={lastName}
+            onChange={(e) => setLastName(e.target.value)}
+          />
+
+          {/* EMAIL */}
           <TextField
             label="Email"
             fullWidth
@@ -80,6 +94,7 @@ export default function Signup() {
             onChange={(e) => setEmail(e.target.value)}
           />
 
+          {/* PASSWORD */}
           <TextField
             label="Password"
             type="password"
@@ -87,29 +102,16 @@ export default function Signup() {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
           />
-          
+
+          {/* SIGN UP BUTTON */}
           <Button
+            type="submit"
             variant="contained"
             fullWidth
             sx={{ borderRadius: 5 }}
-            onClick={async () => {
-            try {
-                const res = await fetch("http://localhost:8080/api/auth/signup", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({email, password, displayName})
-            });
-
-            const text = await res.text();
-            alert(text);
-            } catch (err) {
-            alert("Error connecting to server");
-            }
-            }}
-        >
-        Sign Up
-        </Button>
-
+          >
+            Sign Up
+          </Button>
 
           <Typography variant="body2" textAlign="center" sx={{ mt: 1 }}>
             Already have an account?{" "}

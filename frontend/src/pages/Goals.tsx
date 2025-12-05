@@ -1,8 +1,38 @@
-import { Typography, Box, Paper, Button } from "@mui/material";
+import { Typography, Box, Paper, Button, Dialog, DialogTitle, DialogContent, TextField, DialogActions } from "@mui/material";
 import ProgressBar from "../components/ProgressBar";
 import { useState } from "react";
 
 export default function Goals() {
+  const [goals, setGoals] = useState([]);
+  const [openAddGoal, setOpenAddGoal] = useState(false);
+
+  const [goalName, setGoalName] = useState("");
+  const [currentAmount, setCurrentAmount] = useState("");
+  const [targetAmount, setTargetAmount] = useState("");
+
+  const handleAddGoal = () => {
+    setOpenAddGoal(true);
+  };
+
+  const handleClose = () => {
+    setOpenAddGoal(false);
+    setGoalName("");
+    setCurrentAmount("");
+    setTargetAmount("");
+  }
+
+  const handleSaveGoal = () => {
+    const newGoal = {
+      id: Date.now(),
+      name: goalName,
+      current: Number(currentAmount),
+      target: Number(targetAmount),
+    };
+
+    setGoals([...goals, newGoal]);
+    handleClose();
+  }
+
   const updateFundsButton = (
     <Button
           sx ={{
@@ -15,6 +45,26 @@ export default function Goals() {
           >
             Update funds
           </Button>
+  );
+
+  const GoalCard = ({ goal }) => (
+    <Paper
+    sx = {{
+      maxWidth: "40%",
+      p: 3,
+      mb: 3,
+      borderRadius: "16px",
+      boxShadow: 5,
+    }}
+    >
+      <Typography variant="h6" fontWeight="bold" fontFamily="'Open Sans', sans-serif">
+        {goal.name}
+      </Typography>
+
+      <ProgressBar current={goal.current} target={goal.target} color = "#3CA0CA" />
+
+      {updateFundsButton}
+    </Paper>
   );
 
   return (
@@ -47,59 +97,75 @@ export default function Goals() {
           borderRadius: "2",
           "&:hover": {backgroundColor: "#006B01"},
         }}
+        onClick = {handleAddGoal}
         >
           Add goal
         </Button>
 
-        <Paper
+        {/* Render Goals */ }
+        {goals.length === 0 && (
+          <Typography color = "text.secondary"
           sx = {{
-            maxWidth: "40%",
-            p: 3,
-            mb: 3,
-            borderRadius: "16px",
-            boxShadow: 5,
-          }}
-        >
-          <Typography variant="h6" fontWeight="bold"  fontFamily ="'Open Sans', sans-serif">
-            Emergency fund
+            mt: -1,
+          }}>
+            No goals yet. Click "Add Goal" to get started!
           </Typography>
-          <ProgressBar current={2500} target={5000} color="#3CA0CA" />
-          {updateFundsButton}
-        </Paper>
+        )}
 
-        <Paper
-          sx = {{
-            maxWidth: "40%",
-            p: 3,
-            mb: 3,
-            borderRadius: "16px",
-            boxShadow: 5,
-          }}
-        >
-          <Typography variant="h6" fontWeight="bold" fontFamily ="'Open Sans', sans-serif">
-            New Car
-          </Typography>
-          <ProgressBar current={8000} target={20000} color="#3CA0CA" />
-          {updateFundsButton}
-        </Paper>
+        {goals.map((g) => (
+          <GoalCard key = {g.id} goal={g} />
+        ))}
 
-        <Paper
+        {/* Add Goal (Menu) */}
+        <Dialog open = {openAddGoal} onClose = {handleClose}>
+          <DialogTitle> Add New Goal </DialogTitle>
+          
+          <DialogContent
           sx = {{
-            maxWidth: "40%",
-            p: 3,
-            mb: 3,
-            borderRadius: "16px",
-            boxShadow: 5,
+            display: "flex",
+            flexDirection: "column",
+            gap: 2,
           }}
-        >
-          <Typography variant="h6" fontWeight="bold" fontFamily ="'Open Sans', sans-serif">
-            Vacation
-          </Typography>
-          <ProgressBar current={800} target={3600} color="#3CA0CA" />
-          {updateFundsButton}
-        </Paper>
+          >
+            <TextField
+              label = "Goal Name"
+              fullWidth
+              value = {goalName}
+              onChange = {(e) => setGoalName(e.target.value)}
+            />
+
+            <TextField 
+              label = "Current Amount"
+              type = "number"
+              fullWidth
+              value = {currentAmount}
+              onChange = {(e) => setCurrentAmount(e.target.value)}
+            />
+
+            <TextField 
+              label = "Target Amount"
+              type = "number"
+              fullWidth
+              value = {targetAmount}
+              onChange = {(e) => setTargetAmount(e.target.value)}
+            />
+          </DialogContent>
+
+          <DialogActions>
+            <Button onClick={handleClose}>Cancel</Button>
+
+            <Button
+              onClick={handleSaveGoal}
+              variant = "contained"
+              sx = {{
+                backgroundColor: "green",
+              }}
+            >
+              Save
+            </Button>
+          </DialogActions>
+        </Dialog>
       </Box>
     </Box>
-    
   );
 }

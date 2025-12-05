@@ -1,16 +1,18 @@
 package com.casa.backend.auth;
 
 /**
- * Represents the signup request that is sent from the frontend when a user attempts to sign up and create an account.
- * The record stores the user's entered email, password, and desird display name.
- * 
- * @param email The user's entered email.
- * @param password The user's entered password.
- * @param displayName The name that will be shown for the user after logging in.
+ * Represents the signup request sent from the frontend when a user
+ * creates an account. This record now collects first name, last name,
+ * email, and password.
+ *
+ * @param firstName The user's first name.
+ * @param lastName The user's last name.
+ * @param email The user's email (must be unique).
+ * @param password The user's chosen password.
  */
-
 public record SignupRequest(
+        String firstName,
+        String lastName,
         String email,
-        String password,
-        String displayName
+        String password
 ) {}

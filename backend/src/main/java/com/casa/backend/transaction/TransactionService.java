@@ -18,55 +18,61 @@ public class TransactionService {
 
     private final TransactionRepository transactionRepository;
 
-    /**
-     * Custom CSV date format: MM/dd/yyyy
-     * Example: 12/03/2025
-     */
-    private final DateTimeFormatter csvFormatter = DateTimeFormatter.ofPattern("MM/dd/yyyy");
+    private final DateTimeFormatter csvFormatter =
+            DateTimeFormatter.ofPattern("MM/dd/yyyy");
 
-    /**
-     * Saves a single transaction for a given user.
-     */
     public Transaction saveTransaction(Transaction transaction) {
         return transactionRepository.save(transaction);
     }
 
-    /**
-     * Gets all transactions belonging to a specific user
-     */
+    public Transaction getTransactionById(Long id) {
+        return transactionRepository.findById(id).orElse(null);
+    }
+
+    public void deleteTransaction(Long id) {
+        transactionRepository.deleteById(id);
+    }
+
     public List<Transaction> getTransactionsForUser(User user) {
         return transactionRepository.findAllByUser(user);
     }
 
-    /**
-     * Processes and saves transactions from a CSV file.
-     * Expected CSV format:
-     * MM/dd/yyyy, Starbucks, Food, -4.75
-     */
     public void processCSV(MultipartFile file, User user) {
         try (BufferedReader br = new BufferedReader(new InputStreamReader(file.getInputStream()))) {
-            
-            String line = br.readLine(); // skip header line
 
+            String line = br.readLine();
+
+            // --- Determine if the first line is a header ---
+            boolean hasHeader = line != null && line.toLowerCase().contains("date");
+
+            // If no header, process first line
+            if (!hasHeader && line != null) {
+                processCsvLine(line, user);
+            }
+
+            // Process remaining lines
             while ((line = br.readLine()) != null) {
-                String[] fields = line.split(",");
-
-                // Parse CSV date using custom formatter
-                LocalDate date = LocalDate.parse(fields[0].trim(), csvFormatter);
-
-                Transaction t = Transaction.builder()
-                        .user(user)
-                        .date(date)
-                        .description(fields[1].trim())
-                        .category(fields[2].trim())
-                        .amount(new BigDecimal(fields[3].trim()))
-                        .build();
-
-                transactionRepository.save(t);
+                processCsvLine(line, user);
             }
 
         } catch (Exception e) {
-            throw new RuntimeException("Error processing CSV file: " + e.getMessage(), e);
+            throw new RuntimeException("Error processing CSV: " + e.getMessage(), e);
         }
+    }
+
+    private void processCsvLine(String line, User user) {
+        String[] fields = line.split(",", -1);
+
+        LocalDate date = LocalDate.parse(fields[0].trim(), csvFormatter);
+
+        Transaction t = Transaction.builder()
+                .user(user)
+                .date(date)
+                .description(fields[1].trim())
+                .category(fields[2].trim())
+                .amount(new BigDecimal(fields[3].trim()))
+                .build();
+
+        transactionRepository.save(t);
     }
 }
