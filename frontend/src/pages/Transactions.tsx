@@ -53,6 +53,17 @@ const currency = (n: number) =>
   });
 
 export default function Transactions() {
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [checkingAuth, setCheckingAuth] = useState(true);
+
+  useEffect(() => {
+    const loggedIn = localStorage.getItem("loggedIn");
+    const email = localStorage.getItem("email");
+
+    setIsLoggedIn(Boolean(loggedIn && email));
+    setCheckingAuth(false);
+  }, []);
+
   const [transactions, setTransactions] = useState<any[]>([]);
   const [breakdown, setBreakdown] = useState("By Category");
   const [dateRange, setDateRange] = useState("This Month");
@@ -76,6 +87,12 @@ export default function Transactions() {
     status: "pending",
   });
 
+  useEffect(() => {
+    if (!checkingAuth && !isLoggedIn) {
+      setTransactions([]); // Clears transactions if logged out
+    }
+  }, [checkingAuth, isLoggedIn]);
+
   // SORT FIELD MAPPING
   const SORT_MAP: Record<string, string> = {
     transaction: "name",
@@ -90,6 +107,8 @@ export default function Transactions() {
   // Fetch User Transactions
   // -----------------------------------------------------
   useEffect(() => {
+    if (!isLoggedIn) return;
+
     const fetchTransactions = async () => {
       try {
         const res = await axios.get("http://localhost:8080/api/transactions", {
@@ -114,7 +133,7 @@ export default function Transactions() {
     };
 
     fetchTransactions();
-  }, []);
+  }, [isLoggedIn]);
 
   // Add new transaction
   const handleAddTransaction = async () => {
@@ -449,12 +468,13 @@ export default function Transactions() {
               onChange={(e) => setNewTx({ ...newTx, category: e.target.value })}
             >
               <MenuItem value="Food">Food</MenuItem>
-              <MenuItem value="Shopping">Shopping</MenuItem>
-              <MenuItem value="Transport">Transport</MenuItem>
+              <MenuItem value="Paycheck">Paycheck</MenuItem>
               <MenuItem value="Bills">Bills</MenuItem>
+              <MenuItem value="Shopping">Shopping</MenuItem>
+              <MenuItem value="Vacation">Vacation</MenuItem>
+              <MenuItem value="Transport">Transport</MenuItem>
               <MenuItem value="Entertainment">Entertainment</MenuItem>
               <MenuItem value="Health">Health</MenuItem>
-              <MenuItem value="Health">Vacation</MenuItem>
               <MenuItem value="Other">Other</MenuItem>
             </TextField>
 

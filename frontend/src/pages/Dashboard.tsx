@@ -370,12 +370,24 @@ export default function Dashboard() {
                       {cashFlow.map((_, i) => (
                         <Cell key={i} fill={COLORS[i % COLORS.length]} />
                       ))}
-                    </Pie>
 
+                    </Pie>
                     <Tooltip formatter={(v: number) => currency(v)} />
                   </PieChart>
                 </ResponsiveContainer>
               </Box>
+
+              <Stack direction="row" justifyContent="center" spacing={3} mt={1} mb={1}>
+                <Stack direction="row" spacing={1} alignItems="center">
+                  <Box sx={{ width: 12, height: 12, borderRadius: "50%", backgroundColor: COLORS[0] }} />
+                  <Typography variant="body2">Income</Typography>
+                </Stack>
+
+                <Stack direction="row" spacing={1} alignItems="center">
+                  <Box sx={{ width: 12, height: 12, borderRadius: "50%", backgroundColor: COLORS[1] }} />
+                  <Typography variant="body2">Expenses</Typography>
+                </Stack>
+              </Stack>
 
               <Stack direction="row" justifyContent="center" spacing={1}>
                 <Typography variant="caption">Total</Typography>
