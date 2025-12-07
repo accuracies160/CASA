@@ -1,10 +1,24 @@
 import { useState } from "react";
-import { Typography, Box, Paper, Button, Stack, TextField } from "@mui/material";
+import { useEffect } from "react";
+import { Typography, Box, Paper, Button, Stack, TextField, IconButton } from "@mui/material";
+
+import Visibility from "@mui/icons-material/Visibility";
+import VisibilityOff from "@mui/icons-material/VisibilityOff";
+import InputAdornment from "@mui/material/InputAdornment";
 
 export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [message, setMessage] = useState("");
+
+  const [showPassword, setShowPassword] = useState(false);
+
+  useEffect(() => {
+    localStorage.removeItem("loggedIn");
+    localStorage.removeItem("firstName");
+    localStorage.removeItem("lastName");
+    localStorage.removeItem("email");
+  }, []);
 
   async function handleLogin(e) {
     e.preventDefault();
@@ -17,9 +31,7 @@ export default function Login() {
         body: JSON.stringify({ email, password }),
       });
 
-      // -------------------------------
       // SUCCESSFUL LOGIN
-      // -------------------------------
       if (res.ok) {
         const data = await res.json(); // JSON { firstName, lastName, email }
 
@@ -85,11 +97,20 @@ export default function Login() {
 
           <TextField
             label="Password"
-            type="password"
             variant="outlined"
+            type = {showPassword ? "text" : "password"}
             fullWidth
             value={password}
             onChange={(e) => setPassword(e.target.value)}
+              InputProps = {{
+                endAdornment: (
+                  <InputAdornment position="end">
+                    <IconButton onClick = {() => setShowPassword((prev) => !prev)}>
+                      {showPassword ? <VisibilityOff /> : <Visibility />}
+                    </IconButton>
+                  </InputAdornment>
+                ),
+              }}
           />
 
           <Button

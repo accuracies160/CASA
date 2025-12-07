@@ -43,6 +43,16 @@ import AccountCircle from "@mui/icons-material/AccountCircle";
 export default function Dashboard() {
   const navigate = useNavigate();
 
+  const MONTHS = [
+    "Jan","Feb","Mar","Apr","May","Jun",
+    "Jul","Aug","Sep","Oct","Nov","Dec"
+  ];
+
+  const [selectedMonth, setSelectedMonth] = useState(
+    MONTHS[new Date().getMonth()]
+  );
+  
+
   // Fetch Transactions
   const [transactions, setTransactions] = useState([]);
 
@@ -384,8 +394,16 @@ export default function Dashboard() {
           <Stack direction="row" justifyContent="space-between" mb={1}>
             <Typography variant="h6">Latest Transactions</Typography>
 
-            <Select size="small" value="April" disabled>
-              <MenuItem value="April">April</MenuItem>
+            <Select 
+            size="small" 
+            value = {selectedMonth}
+            onChange = {(e) => setSelectedMonth(e.target.value)}
+            >
+              {MONTHS.map((m) => (
+                <MenuItem key = {m} value = {m}>
+                  {m}
+                </MenuItem>
+              ))}
             </Select>
           </Stack>
 

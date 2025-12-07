@@ -64,6 +64,8 @@ export default function Transactions() {
   const [openModal, setOpenModal] = useState(false);
   const [snackbarOpen, setSnackbarOpen] = useState(false);
 
+  const [deleteSnackbar, setDeleteSnackbar] = useState(false);
+
   const [newTx, setNewTx] = useState({
     name: "",
     category: "",
@@ -216,6 +218,7 @@ export default function Transactions() {
         if (res.ok) {
           // Remove from UI
           setTransactions(prev => prev.filter(t => t.id !== id));
+          setDeleteSnackbar(true);
         } else {
           console.error("Failed to delete");
         }
@@ -507,7 +510,18 @@ export default function Transactions() {
         onClose={() => setSnackbarOpen(false)}
       >
         <Alert severity="success" variant="filled">
-          Transaction added successfully!
+          Transaction added!
+        </Alert>
+      </Snackbar>
+
+      {/* SNACKBAR – Delete Transaction */}
+      <Snackbar
+        open={deleteSnackbar}
+        autoHideDuration={3000}
+        onClose={() => setDeleteSnackbar(false)}
+      >
+        <Alert severity="success" variant="filled">
+          Transaction deleted!
         </Alert>
       </Snackbar>
     </Stack>

@@ -43,7 +43,7 @@ export default function Profile() {
           }}
         >
           <Typography variant="h5" mb={1}>
-            Welcome, {firstName} {lastName}
+            Welcome, {firstName}
           </Typography>
 
           <Divider />
@@ -113,16 +113,6 @@ export default function Profile() {
             </Typography>
 
             <Divider sx={{ mt: 1 }} />
-
-            <Typography variant="body1" mt={1}>
-              Password:
-            </Typography>
-
-            <Divider sx={{ mt: 1 }} />
-
-            <Typography variant="body1" mt={1}>
-              Blank
-            </Typography>
           </Paper>
         )}
       </Box>

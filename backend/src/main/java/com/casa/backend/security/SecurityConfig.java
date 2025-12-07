@@ -44,8 +44,10 @@ public class SecurityConfig {
             .csrf(csrf -> csrf.disable())
             .cors(cors -> {})   // CORS by CorsConfig
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/api/auth/**").permitAll()  // only auth is public
-                .anyRequest().authenticated()                // everything else requires login
+                .requestMatchers("/api/auth/**").permitAll()
+                .requestMatchers("/api/goals/**").authenticated()     
+                .requestMatchers("/api/transactions/**").authenticated()
+                .anyRequest().authenticated()
             )
             .sessionManagement(session -> session
                 .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
