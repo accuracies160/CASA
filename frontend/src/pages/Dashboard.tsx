@@ -52,7 +52,6 @@ export default function Dashboard() {
     MONTHS[new Date().getMonth()]
   );
   
-
   // Fetch Transactions
   const [transactions, setTransactions] = useState([]);
 

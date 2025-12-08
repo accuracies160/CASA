@@ -253,7 +253,7 @@ export default function Transactions() {
         <Typography variant="h4" fontWeight={800}>
           Transactions
         </Typography>
-        <Typography variant="subtitle1" color="text.secondary">
+        <Typography variant="subtitle1" color="text.secondary" mb={-2}>
           Comprehensive view of your finances
         </Typography>
       </Box>

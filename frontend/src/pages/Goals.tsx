@@ -206,7 +206,7 @@ export default function Goals() {
           }}
           onClick={handleAddGoal}
         >
-          Add goal
+          + Add goal
         </Button>
 
         {goals.length === 0 && (

@@ -96,7 +96,7 @@ export default function Profile() {
               boxShadow: 5,
             }}
           >
-            <Typography variant="h5" mb={2}>
+            <Typography variant="h5" mb={1}>
               My Profile
             </Typography>
 
