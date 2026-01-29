@@ -239,7 +239,7 @@ async function fetchUserData() {
           <Card sx={{ borderRadius: 3, boxShadow: 5 }}>
             <CardContent>
               <Typography variant="h6" fontWeight={700}>
-                Budgets for {new Date().toLocaleString("en-US", { month: "long" })}
+                Budget for {new Date().toLocaleString("en-US", { month: "long" })}
               </Typography>
 
               <Divider sx={{ my: 2 }} />

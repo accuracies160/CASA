@@ -59,6 +59,18 @@ public class TransactionController {
             return ResponseEntity.ok("Deleted");
             }
 
+        @DeleteMapping("/bulk")
+        public ResponseEntity<?> deleteTransactionsBulk(
+                @RequestBody List<Long> ids,
+                Principal principal) {
+
+            User user = userService.getByEmail(principal.getName());
+
+            transactionService.deleteTransactionsBulk(ids, user);
+            
+            return ResponseEntity.ok("Bulk delete successful");
+        }
+
         /**
          * Returns all transactions for the logged-in user.
          */

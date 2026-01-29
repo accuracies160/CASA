@@ -24,7 +24,8 @@ import {
   DialogContent,
   DialogActions,
   TableSortLabel,
-  IconButton
+  IconButton,
+  Checkbox
 } from "@mui/material";
 
 import FilterListIcon from "@mui/icons-material/FilterList";
@@ -35,10 +36,9 @@ import PendingIcon from "@mui/icons-material/AccessTime";
 import FileDownloadIcon from "@mui/icons-material/FileDownload";
 import DeleteIcon from '@mui/icons-material/Delete';
 
-import axios from "axios";
+import { CheckboxSelection } from "../components/CheckboxSelection";
 
-// Pie chart imports
-import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer, Legend } from "recharts";
+import axios from "axios";
 
 // -----------------------------------------------------
 // CONSTANTS
@@ -227,6 +227,8 @@ export default function Transactions() {
     });
 
     // Delete transactions
+
+    // Delete Single Transaction
     async function handleDelete(id: number) {
       try {
         const res = await fetch(`http://localhost:8080/api/transactions/${id}`, {
@@ -243,6 +245,46 @@ export default function Transactions() {
         }
       } catch (err) {
         console.error("Delete error", err);
+      }
+    }
+
+    // Select Multiple Transactions
+    const [selectionMode, setSelectionMode] = useState(false);
+
+    const selection = CheckboxSelection<number>();
+
+    // Delete Multiple Transactions
+    async function handleBulkDelete() {
+      const ids = Array.from(selection.selected);
+
+      if (ids.length === 0) return;
+
+      try {
+        const res = await fetch("http://localhost:8080/api/transactions/bulk", {
+          method: "DELETE",
+          credentials: "include",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(ids),
+        });
+      
+        if (!res.ok) {
+          throw new Error("Bulk delete failed");
+        }
+      
+        // Remove deleted transactions from UI
+        setTransactions(prev =>
+          prev.filter(t => !selection.selected.has(t.id))
+        );
+      
+        selection.clear();
+        setSelectionMode(false);
+        setDeleteSnackbar(true);
+      
+      } catch (err) {
+        console.error(err);
+        alert("Failed to delete selected transactions");
       }
     }
 
@@ -358,8 +400,29 @@ export default function Transactions() {
                 Export
               </Button>
               <Button variant="contained" onClick={() => setOpenModal(true)}>
-                + Add Transaction
+                + Add Transaction(s)
               </Button>
+              <Button 
+              variant="contained"
+              color = {selectionMode ? "secondary" : "primary"}
+              onClick = {() => {
+                setSelectionMode(prev => !prev);
+                selection.clear();
+              }}
+              >
+                {selectionMode ? "Done Selecting" : "Select Transactions"}
+              </Button>
+
+              {selectionMode && selection.count > 0 && (
+                <Button
+                  variant="contained"
+                  color="error"
+                  startIcon={<DeleteIcon />}
+                  onClick={handleBulkDelete}
+                >
+                  Delete ({selection.count})
+                </Button>
+              )}
             </Stack>
           </Stack>
 
@@ -368,23 +431,43 @@ export default function Transactions() {
           <Table size="small">
             <TableHead>
               <TableRow>
-                {["Transaction", "Category", "Account", "Date", "Status", "Amount", "Delete"].map((header) => (
-                  <TableCell key={header}>
-                    <TableSortLabel
-                      active={sortBy === header.toLowerCase()}
-                      direction={sortOrder}
-                      onClick={() => setSortBy(header.toLowerCase())}
-                    >
-                      {header}
-                    </TableSortLabel>
+                {selectionMode && (
+                  <TableCell padding="checkbox">
+                    <Checkbox
+                      indeterminate={
+                        selection.count > 0 &&
+                        selection.count < filteredTx.length
+                      }
+                      checked = {
+                        filteredTx.length > 0 &&
+                        selection.count === filteredTx.length
+                      }
+                      onChange={() =>
+                        selection.toggleMany(filteredTx.map(t => t.id))
+                      }
+                    />
                   </TableCell>
-                ))}
+                )}
+                {["Transaction", "Category", "Account", "Date", "Status", "Amount", "Delete"]
+                  .map(header => (
+                    <TableCell key={header}>{header}</TableCell>
+                  ))}
               </TableRow>
             </TableHead>
 
             <TableBody>
               {filteredTx.map((t) => (
                 <TableRow key={t.id} hover>
+
+                  {selectionMode && (
+                    <TableCell padding="checkbox">
+                      <Checkbox
+                        checked={selection.selected.has(t.id)}
+                        onChange={() => selection.toggleOne(t.id)}
+                      />
+                    </TableCell>
+                  )}
+
                   <TableCell>
                     <Stack direction="row" alignItems="center" spacing={1}>
                       {t.type === "income" ? (
@@ -436,6 +519,7 @@ export default function Transactions() {
                     <IconButton
                     color = "error"
                     size = "small"
+                    disabled = {selectionMode}
                     onClick = {() => handleDelete(t.id)}
                     >
                       <DeleteIcon />
@@ -450,9 +534,12 @@ export default function Transactions() {
 
       {/* ADD TRANSACTION MODAL */}
       <Dialog open={openModal} onClose={() => setOpenModal(false)} fullWidth maxWidth="sm">
-        <DialogTitle>Add New Transaction</DialogTitle>
+        <DialogTitle mb = {-2}>Add New Transaction</DialogTitle>
         <DialogContent>
           <Stack spacing={2} mt={1}>
+            <Typography>
+              Single Transaction:
+            </Typography>
             <TextField
               label="Transaction Name"
               fullWidth
@@ -512,6 +599,12 @@ export default function Transactions() {
               <MenuItem value="pending">Pending</MenuItem>
               <MenuItem value="completed">Completed</MenuItem>
             </Select>
+            <Typography>
+              Multiple Transactions:
+            </Typography>
+            <Button variant="contained">
+              Upload File
+            </Button>
           </Stack>
         </DialogContent>
 

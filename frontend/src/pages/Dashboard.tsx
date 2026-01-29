@@ -52,7 +52,7 @@ export default function Dashboard() {
     MONTHS[new Date().getMonth()]
   );
   
-  // Fetch Transactions
+  /* ---------------- Fetch Transactions ---------------- */
   const [transactions, setTransactions] = useState([]);
 
   async function fetchUserData() {
@@ -70,6 +70,14 @@ export default function Dashboard() {
       console.error("Failed to fetch user data", err);
     }
   }
+
+  /* ---------------- Filter Transactions ---------------- */
+  const filteredTransactions = useMemo(() => {
+  return transactions.filter(t => {
+    const monthShort = new Date(t.date).toLocaleString("en-US", { month: "short" });
+    return monthShort === selectedMonth;
+  });
+  }, [transactions, selectedMonth]);
 
   /* ---------------- LOGIN STATE ---------------- */
   const[isLoggedIn, setIsLoggedIn] = useState(false);
@@ -153,12 +161,6 @@ export default function Dashboard() {
     return totalIncome - totalExpenses;
   }, [totalIncome, totalExpenses]);
 
-  const kpi = [
-    { label: "My Balance", value: balance, delta: +0 },
-    { label: "Total Income", value: totalIncome, delta: +0 },
-    { label: "Total Expenses", value: totalExpenses, delta: -0 },
-  ];
-
   const cashFlow = [
     { name: "Income", value: totalIncome},
     { name: "Expenses", value: totalExpenses},
@@ -191,8 +193,86 @@ export default function Dashboard() {
   
     return Object.values(monthly);
   }, [transactions]);
-  
 
+  /* ---------- Previous Month Calculations ---------- */
+
+  const currentMonthIndex = new Date().getMonth();
+  const lastMonthIndex = (currentMonthIndex - 1 + 12) % 12;
+
+  // Last Month Income
+  const lastMonthIncome = useMemo(() => {
+    return transactions
+      .filter(t => {
+        const m = new Date(t.date).getMonth();
+        return m === lastMonthIndex && t.amount > 0;
+      })
+      .reduce((s, t) => s + t.amount, 0);
+  }, [transactions, lastMonthIndex]);
+
+  // Last Month Expenses
+  const lastMonthExpenses = useMemo(() => {
+    return transactions
+      .filter(t => {
+        const m = new Date(t.date).getMonth();
+        return m === lastMonthIndex && t.amount < 0;
+      })
+      .reduce((s, t) => s + Math.abs(t.amount), 0);
+  }, [transactions, lastMonthIndex]);
+
+  // Last Month Balance
+  const lastMonthBalance = useMemo(() => {
+    return lastMonthIncome - lastMonthExpenses;
+  }, [lastMonthIncome, lastMonthExpenses]);
+
+  /* ---------- Current Month Calculations ---------- */
+const currentMonthIncome = useMemo(() => {
+  return transactions
+    .filter(t => {
+      const m = new Date(t.date).getUTCMonth();
+      return m === currentMonthIndex && t.amount > 0;
+    })
+    .reduce((s, t) => s + t.amount, 0);
+}, [transactions, currentMonthIndex]);
+
+const currentMonthExpenses = useMemo(() => {
+  return transactions
+    .filter(t => {
+      const m = new Date(t.date).getUTCMonth();
+      return m === currentMonthIndex && t.amount < 0;
+    })
+    .reduce((s, t) => s + Math.abs(t.amount), 0);
+}, [transactions, currentMonthIndex]);
+
+const currentMonthBalance = currentMonthIncome - currentMonthExpenses;
+
+  /* ---------- Delta formula ---------- */
+  function calcDelta(current: number, previous: number): number {
+    if (previous === 0) {
+      if (current === 0) return 0; // no change
+      return 100;
+    }
+    return ((current - previous) / Math.abs(previous)) * 100;
+  }
+
+  /* ---------- DELTAS ---------- */
+  const incomeDelta = calcDelta(currentMonthIncome, lastMonthIncome);
+  const expensesDelta = calcDelta(currentMonthExpenses, lastMonthExpenses);
+  const balanceDelta = calcDelta(currentMonthBalance, lastMonthBalance);
+
+const kpi = [
+  { label: "My Balance", value: currentMonthBalance, delta: balanceDelta, type: "balance" },
+  { label: "Total Income", value: currentMonthIncome, delta: incomeDelta, type: "income" },
+  { label: "Total Expenses", value: currentMonthExpenses, delta: expensesDelta, type: "expenses" },
+];
+
+function isPositiveChange(delta: number) {
+  return delta > 0; // NOT >= 0 — zero is neutral
+}
+
+function isNeutral(delta: number) {
+  return delta === 0; // NOT >= 0 — zero is neutral
+}
+ 
   /* -------------------------------------- */
 
   if (checkingAuth) return null;
@@ -276,32 +356,54 @@ export default function Dashboard() {
 
       {/* ---------------- KPI CARDS ---------------- */}
       <Grid container spacing={2}>
-        {kpi.map((k) => {
-          const up = k.delta >= 0;
-          return (
-            <Grid item xs={12} md={6} lg={3} key={k.label}>
-              <Card variant="outlined" sx={{ borderRadius: 3 }}>
-                <CardContent>
-                  <Stack direction="row" spacing={1} alignItems="center" mb={1}>
-                    <Chip
-                      size="small"
-                      color={up ? "success" : "info"}
-                      icon={up ? <ArrowDropUpIcon /> : <ArrowDropDownIcon />}
-                      label={`${Math.abs(k.delta)}%`}
-                    />
-                  </Stack>
+{ kpi.map((k) => {
 
-                  <Typography variant="subtitle2" color="text.secondary">
-                    {k.label}
-                  </Typography>
-                  <Typography variant="h5" fontWeight={800}>
-                    {currency(k.value)}
-                  </Typography>
-                </CardContent>
-              </Card>
-            </Grid>
-          );
-        })}
+  // determine direction
+  const isIncrease = isPositiveChange(k.delta);
+  const neutral = isNeutral(k.delta);
+
+  // color rules
+  let chipColor: "success" | "error" | "info" = "success";
+  let ArrowIcon = ArrowDropUpIcon;
+
+  if (k.type === "income" || k.type === "balance") {
+    // good when increasing
+    chipColor = isIncrease ? "success" : "error";
+    ArrowIcon = isIncrease ? ArrowDropUpIcon : ArrowDropDownIcon;
+  }
+
+  if (k.type === "expenses") {
+    // bad when increasing
+    chipColor = isIncrease ? "error" : "success";
+    ArrowIcon = isIncrease ? ArrowDropUpIcon : ArrowDropDownIcon;
+  }
+
+  return (
+    <Grid item xs={12} md={6} lg={3} key={k.label}>
+      <Card variant="outlined" sx={{ borderRadius: 3 }}>
+        <CardContent>
+
+          <Stack direction="row" spacing={1} alignItems="center" mb={1}>
+            <Chip
+              size="small"
+              color={chipColor}
+              icon={<ArrowIcon />}
+              label={`${Math.abs(k.delta).toFixed(0)}%`}
+            />
+          </Stack>
+
+          <Typography variant="subtitle2" color="text.secondary">
+            {k.label}
+          </Typography>
+          <Typography variant="h5" fontWeight={800}>
+            {currency(k.value)}
+          </Typography>
+
+        </CardContent>
+      </Card>
+    </Grid>
+  );
+})}
       </Grid>
 
       {/* ---------------- SUMMARY CHART ---------------- */}
@@ -403,7 +505,7 @@ export default function Dashboard() {
       <Card variant="outlined" sx={{ borderRadius: 3 }}>
         <CardContent>
           <Stack direction="row" justifyContent="space-between" mb={1}>
-            <Typography variant="h6">Latest Transactions</Typography>
+            <Typography variant="h6">Transactions</Typography>
 
             <Select 
             size="small" 
@@ -432,7 +534,7 @@ export default function Dashboard() {
             </TableHead>
 
             <TableBody>
-              {transactions.slice(0, 5).map((t, idx) => (
+              {filteredTransactions.slice(0, 5).map((t, idx) => (
                 <TableRow key={idx} hover>
                   <TableCell>{t.date}</TableCell>
                   <TableCell>{t.description}</TableCell>

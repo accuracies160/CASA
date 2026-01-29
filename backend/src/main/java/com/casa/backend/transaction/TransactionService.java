@@ -4,6 +4,7 @@ import com.casa.backend.user.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -31,6 +32,12 @@ public class TransactionService {
 
     public void deleteTransaction(Long id) {
         transactionRepository.deleteById(id);
+    }
+
+
+    @Transactional
+    public void deleteTransactionsBulk(List<Long> ids, User user) {
+        transactionRepository.deleteAllByIdInAndUser(ids, user);
     }
 
     public List<Transaction> getTransactionsForUser(User user) {
