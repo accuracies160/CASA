@@ -1,192 +1,421 @@
-import { useMemo, useState } from "react";
-import {Box, Card, CardContent, Grid, Typography, Chip, Divider, ToggleButtonGroup, ToggleButton, Table, TableHead, TableRow, TableCell, TableBody, MenuItem, Select, Stack, Button } from "@mui/material";
+import { useMemo, useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import {
+  Box,
+  Menu,
+  Card,
+  CardContent,
+  Grid,
+  Typography,
+  Chip,
+  Divider,
+  ToggleButtonGroup,
+  ToggleButton,
+  Table,
+  TableHead,
+  TableRow,
+  TableCell,
+  TableBody,
+  MenuItem,
+  Select,
+  Stack,
+  IconButton,
+} from "@mui/material";
 import ArrowDropUpIcon from "@mui/icons-material/ArrowDropUp";
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
-import {BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Tooltip, Legend, PieChart, Pie, Cell,} from "recharts";
-import AccountCircle from '@mui/icons-material/AccountCircle';
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  ResponsiveContainer,
+  Tooltip,
+  Legend,
+  PieChart,
+  Pie,
+  Cell,
+  CartesianGrid,
+} from "recharts";
+import SearchIcon from "@mui/icons-material/Search";
+import NotificationsNoneIcon from "@mui/icons-material/NotificationsNone";
+import AccountCircle from "@mui/icons-material/AccountCircle";
 
-const kpi = [
-  { label: "My Balance", value: 23516, delta: +20 },
-  { label: "Total Income", value: 45454, delta: +19 },
-  { label: "Total Savings", value: 32654, delta: -22 },
-  { label: "Total Expenses", value: 21938, delta: -27 },
-];
+export default function Dashboard() {
+  const navigate = useNavigate();
 
-const monthlyData = [
-  { name: "Jan", income: 3200, expense: 2800 },
-  { name: "Feb", income: 3000, expense: 2600 },
-  { name: "Mar", income: 3400, expense: 3150 },
-  { name: "Apr", income: 1500, expense: 1200 },
-  { name: "May", income: 2200, expense: 2350 },
-  { name: "Jun", income: 1800, expense: 1100 },
-  { name: "Jul", income: 3300, expense: 2100 },
-  { name: "Aug", income: 1200, expense: 900 },
-  { name: "Sep", income: 1700, expense: 1500 },
-  { name: "Oct", income: 3600, expense: 3400 },
-  { name: "Nov", income: 1600, expense: 1200 },
-  { name: "Dec", income: 3400, expense: 1400 },
-];
+  const MONTHS = [
+    "Jan","Feb","Mar","Apr","May","Jun",
+    "Jul","Aug","Sep","Oct","Nov","Dec"
+  ];
 
-const weeklyData = [
-  { name: "Week 1", income: 1200, expense: 800 },
-  { name: "Week 2", income: 1500, expense: 900 },
-  { name: "Week 3", income: 1000, expense: 1100 },
-  { name: "Week 4", income: 1800, expense: 1300 },
-];
+  const [selectedMonth, setSelectedMonth] = useState(
+    MONTHS[new Date().getMonth()]
+  );
+  
+  /* ---------------- Fetch Transactions ---------------- */
+  const [transactions, setTransactions] = useState([]);
 
-const dailyData = [
-  { name: "Mon", income: 500, expense: 300 },
-  { name: "Tue", income: 700, expense: 400 },
-  { name: "Wed", income: 800, expense: 450 },
-  { name: "Thu", income: 600, expense: 500 },
-  { name: "Fri", income: 900, expense: 600 },
-  { name: "Sat", income: 300, expense: 200 },
-  { name: "Sun", income: 400, expense: 350 },
-];
+  async function fetchUserData() {
+    try {
+      const res = await fetch("http://localhost:8080/api/transactions", {
+        method: "GET",
+        credentials: "include",
+      });
 
-const cashFlow = [
-  { name: "Salary", value: 6200 },
-  { name: "Expenses", value: 3865 },
-];
+      if (!res.ok ) return;
 
-const tx = [
-  {
-    date: "10/12/25",
-    name: "Resturant",
-    type: "Cash",
-    category: "Food",
-    amount: -10.0,
-  },
-  {
-    date: "10/10/25",
-    name: "Resturant",
-    type: "Cash",
-    category: "Food",
-    amount: -50,
-  },
-  {
-    date: "10/10/25",
-    name: "Paycheck",
-    type: "Check",
-    category: "Paycheck",
-    amount: 7000,
-  },
-  {
-    date: "10/07/25",
-    name: "Share Market",
-    type: "Check",
-    category: "Business",
-    amount: 11000,
-  },
-  {
-    date: "10/06/25",
-    name: "Invest Money",
-    type: "Check",
-    category: "Business",
-    amount: 11000,
-  },
-];
+      const data = await res.json();
+      setTransactions(data);
+    } catch (err) {
+      console.error("Failed to fetch user data", err);
+    }
+  }
 
-const currency = (n: number) =>
-  n.toLocaleString(undefined, {
-    style: "currency",
-    currency: "USD",
-    maximumFractionDigits: 0,
+  /* ---------------- Filter Transactions ---------------- */
+  const filteredTransactions = useMemo(() => {
+  return transactions.filter(t => {
+    const monthShort = new Date(t.date).toLocaleString("en-US", { month: "short" });
+    return monthShort === selectedMonth;
   });
+  }, [transactions, selectedMonth]);
 
-export default function Overview() {
+  /* ---------------- LOGIN STATE ---------------- */
+  const[isLoggedIn, setIsLoggedIn] = useState(false);
+
+  const [checkingAuth, setCheckingAuth] = useState(true);
+
+
+  useEffect(() => {
+    const loggedIn = localStorage.getItem("loggedIn");
+    const email = localStorage.getItem("email");
+
+    setIsLoggedIn(Boolean(loggedIn && email));
+    setCheckingAuth(false);
+  }, []);
+
+  useEffect(() =>{
+    if(!checkingAuth && !isLoggedIn) {
+      setTransactions([]);
+      navigate("/dashboard"); // Change to "/login" in future
+    }
+  }, [checkingAuth, isLoggedIn, navigate]);
+
+  useEffect(() => {
+    if(isLoggedIn) {
+      fetchUserData();
+    }
+  }, [isLoggedIn]);
+
+  /* ---------------- MENU ---------------- */
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const open = Boolean(anchorEl);
+
+  const handleMenuOpen = (event: React.MouseEvent<HTMLButtonElement>) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleMenuClose = () => {
+    setAnchorEl(null);
+  };
+
+  const handleLogout = () => {
+    handleMenuClose();
+    localStorage.clear();
+    setTransactions([]);
+
+    setIsLoggedIn(false);
+    navigate("/login");
+  };
+
+  /* -------------------------------------- */
+
+  /* ---------------- CHART STATE ---------------- */
   const [period, setPeriod] = useState<"Monthly" | "Weekly" | "Daily">(
     "Monthly"
   );
-  const totalCashFlow = useMemo(
-    () => cashFlow.reduce((a, b) => a + b.value, 0),
-    []
-  );
+  /* -------------------------------------- */
+
+  /* ---------------- CHART DATA ---------------- */
   const COLORS = ["#6ec1e4", "#f5b971"];
 
-  const chartData =
-    period === "Daily"
-      ? dailyData
-      : period === "Weekly"
-      ? weeklyData
-      : monthlyData;
+  const currency = (n: number) =>
+    n.toLocaleString(undefined, {
+      style: "currency",
+      currency: "USD",
+      maximumFractionDigits: 0,
+    });
 
-  <Box sx={{ width: "100%", height: 280 }}>
-    <ResponsiveContainer>
-      <BarChart data={chartData} barGap={6}>
-        <XAxis dataKey="name" />
-        <YAxis tickFormatter={(v) => (v >= 1000 ? `$${v / 1000}k` : `$${v}`)} />
-        <Tooltip formatter={(v: number) => currency(v)} />
-        <Legend />
-        <Bar
-          dataKey="income"
-          name="Income"
-          fill="#6ec1e4"
-          radius={[8, 8, 0, 0]}
-        />
-        <Bar
-          dataKey="expense"
-          name="Expenses"
-          fill="#f5b971"
-          radius={[8, 8, 0, 0]}
-        />
-      </BarChart>
-    </ResponsiveContainer>
-  </Box>;
+    const totalIncome = useMemo(() => {
+      return transactions
+      .filter(t => t.amount > 0)
+      .reduce((sum, t) => sum + t.amount, 0);
+  }, [transactions]);
 
+  const totalExpenses = useMemo(() => {
+    return transactions
+      .filter(t => t.amount < 0)
+      .reduce((sum, t) => sum + Math.abs(t.amount), 0);
+  }, [transactions]);
+  
+  const balance = useMemo(() => {
+    return totalIncome - totalExpenses;
+  }, [totalIncome, totalExpenses]);
+
+  const cashFlow = [
+    { name: "Income", value: totalIncome},
+    { name: "Expenses", value: totalExpenses},
+  ]
+
+  const totalCashFlow = totalIncome + totalExpenses;
+
+  const chartData = useMemo(() => {
+    const months = [
+      "Jan","Feb","Mar","Apr","May","Jun",
+      "Jul","Aug","Sep","Oct","Nov","Dec"
+    ];
+  
+    // Start with all months = 0
+    const monthly = {};
+    months.forEach(m => {
+      monthly[m] = { name: m, income: 0, expense: 0 };
+    });
+  
+    // Fill in real data
+    transactions.forEach(t => {
+      const month = new Date(t.date).toLocaleString("en-US", { month: "short" });
+  
+      if (t.amount > 0) {
+        monthly[month].income += t.amount;
+      } else {
+        monthly[month].expense += Math.abs(t.amount);
+      }
+    });
+  
+    return Object.values(monthly);
+  }, [transactions]);
+
+  /* ---------- Previous Month Calculations ---------- */
+
+  const currentMonthIndex = new Date().getMonth();
+  const lastMonthIndex = (currentMonthIndex - 1 + 12) % 12;
+
+  // Last Month Income
+  const lastMonthIncome = useMemo(() => {
+    return transactions
+      .filter(t => {
+        const m = new Date(t.date).getMonth();
+        return m === lastMonthIndex && t.amount > 0;
+      })
+      .reduce((s, t) => s + t.amount, 0);
+  }, [transactions, lastMonthIndex]);
+
+  // Last Month Expenses
+  const lastMonthExpenses = useMemo(() => {
+    return transactions
+      .filter(t => {
+        const m = new Date(t.date).getMonth();
+        return m === lastMonthIndex && t.amount < 0;
+      })
+      .reduce((s, t) => s + Math.abs(t.amount), 0);
+  }, [transactions, lastMonthIndex]);
+
+  // Last Month Balance
+  const lastMonthBalance = useMemo(() => {
+    return lastMonthIncome - lastMonthExpenses;
+  }, [lastMonthIncome, lastMonthExpenses]);
+
+  /* ---------- Current Month Calculations ---------- */
+const currentMonthIncome = useMemo(() => {
+  return transactions
+    .filter(t => {
+      const m = new Date(t.date).getUTCMonth();
+      return m === currentMonthIndex && t.amount > 0;
+    })
+    .reduce((s, t) => s + t.amount, 0);
+}, [transactions, currentMonthIndex]);
+
+const currentMonthExpenses = useMemo(() => {
+  return transactions
+    .filter(t => {
+      const m = new Date(t.date).getUTCMonth();
+      return m === currentMonthIndex && t.amount < 0;
+    })
+    .reduce((s, t) => s + Math.abs(t.amount), 0);
+}, [transactions, currentMonthIndex]);
+
+const currentMonthBalance = currentMonthIncome - currentMonthExpenses;
+
+  /* ---------- Delta formula ---------- */
+  function calcDelta(current: number, previous: number): number {
+    if (previous === 0) {
+      if (current === 0) return 0; // no change
+      return 100;
+    }
+    return ((current - previous) / Math.abs(previous)) * 100;
+  }
+
+  /* ---------- DELTAS ---------- */
+  const incomeDelta = calcDelta(currentMonthIncome, lastMonthIncome);
+  const expensesDelta = calcDelta(currentMonthExpenses, lastMonthExpenses);
+  const balanceDelta = calcDelta(currentMonthBalance, lastMonthBalance);
+
+const kpi = [
+  { label: "My Balance", value: currentMonthBalance, delta: balanceDelta, type: "balance" },
+  { label: "Total Income", value: currentMonthIncome, delta: incomeDelta, type: "income" },
+  { label: "Total Expenses", value: currentMonthExpenses, delta: expensesDelta, type: "expenses" },
+];
+
+function isPositiveChange(delta: number) {
+  return delta > 0; // NOT >= 0 — zero is neutral
+}
+
+function isNeutral(delta: number) {
+  return delta === 0; // NOT >= 0 — zero is neutral
+}
+ 
+  /* -------------------------------------- */
+
+  if (checkingAuth) return null;
+
+  /* ---------------- DASHBOARD UI ---------------- */
   return (
     <Stack spacing={3}>
-      <Box>
-        <Typography variant="h4" fontWeight={800}>
-          Dashboard
-        </Typography>
-        <Typography variant="subtitle1" color="text.secondary">
-          Welcome back! Here’s your financial summary
-        </Typography>
+      {/* ---------------- TOP BAR ---------------- */}
+      <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+        <Box>
+          <Typography variant="h4" fontWeight={800}>
+            Dashboard
+          </Typography>
+          <Typography variant="subtitle1" color="text.secondary">
+            Welcome back! Here’s your financial summary
+          </Typography>
+        </Box>
+
+        {/* RIGHT ICONS */}
+        <Stack direction="row" spacing={1} alignItems="center">
+          <IconButton>
+            <SearchIcon />
+          </IconButton>
+
+          <IconButton>
+            <NotificationsNoneIcon />
+          </IconButton>
+
+          <Divider orientation="vertical" sx={{ height: 35 }} />
+
+          <IconButton
+            onClick={(e) => {
+              if (!isLoggedIn) navigate("/login");
+              else handleMenuOpen(e);
+            }}
+          >
+            <AccountCircle />
+          </IconButton>
+
+          {/* ACCOUNT MENU */}
+          <Menu 
+          anchorEl={anchorEl} 
+          open={open} 
+          onClose={handleMenuClose}
+          >
+
+            {/* If NOT logged in, show Login */}
+            {!isLoggedIn && (
+              <MenuItem
+                onClick={() => {
+                  handleMenuClose();
+                  navigate("/login");
+                }}
+              >
+                Login
+              </MenuItem>
+            )}
+
+            {/* If logged in, show Profile */}
+            {isLoggedIn && (
+              <MenuItem
+                onClick={() => {
+                  handleMenuClose();
+                  navigate("/profile");
+                }}
+              >
+                Profile
+              </MenuItem>
+            )}
+
+            {/* If logged in, show Logout */}
+            {isLoggedIn && (
+              <>
+                <Divider />
+                <MenuItem onClick={handleLogout}>Logout</MenuItem>
+              </>
+            )}
+          </Menu>
+        </Stack>
       </Box>
 
+      {/* ---------------- KPI CARDS ---------------- */}
       <Grid container spacing={2}>
-        {kpi.map((k) => {
-          const up = k.delta >= 0;
-          return (
-            <Grid item xs={12} md={6} lg={3} key={k.label}>
-              <Card variant="outlined" sx={{ borderRadius: 3 }}>
-                <CardContent>
-                  <Stack direction="row" spacing={1} alignItems="center" mb={1}>
-                    <Chip
-                      size="small"
-                      color={up ? "success" : "info"}
-                      icon={up ? <ArrowDropUpIcon /> : <ArrowDropDownIcon />}
-                      label={`${Math.abs(k.delta)}%`}
-                      sx={{ fontWeight: 700 }}
-                    />
-                  </Stack>
-                  <Typography variant="subtitle2" color="text.secondary">
-                    {k.label}
-                  </Typography>
-                  <Typography variant="h5" fontWeight={800}>
-                    {currency(k.value)}
-                  </Typography>
-                </CardContent>
-              </Card>
-            </Grid>
-          );
-        })}
+{ kpi.map((k) => {
+
+  // determine direction
+  const isIncrease = isPositiveChange(k.delta);
+  const neutral = isNeutral(k.delta);
+
+  // color rules
+  let chipColor: "success" | "error" | "info" = "success";
+  let ArrowIcon = ArrowDropUpIcon;
+
+  if (k.type === "income" || k.type === "balance") {
+    // good when increasing
+    chipColor = isIncrease ? "success" : "error";
+    ArrowIcon = isIncrease ? ArrowDropUpIcon : ArrowDropDownIcon;
+  }
+
+  if (k.type === "expenses") {
+    // bad when increasing
+    chipColor = isIncrease ? "error" : "success";
+    ArrowIcon = isIncrease ? ArrowDropUpIcon : ArrowDropDownIcon;
+  }
+
+  return (
+    <Grid item xs={12} md={6} lg={3} key={k.label}>
+      <Card variant="outlined" sx={{ borderRadius: 3 }}>
+        <CardContent>
+
+          <Stack direction="row" spacing={1} alignItems="center" mb={1}>
+            <Chip
+              size="small"
+              color={chipColor}
+              icon={<ArrowIcon />}
+              label={`${Math.abs(k.delta).toFixed(0)}%`}
+            />
+          </Stack>
+
+          <Typography variant="subtitle2" color="text.secondary">
+            {k.label}
+          </Typography>
+          <Typography variant="h5" fontWeight={800}>
+            {currency(k.value)}
+          </Typography>
+
+        </CardContent>
+      </Card>
+    </Grid>
+  );
+})}
       </Grid>
 
+      {/* ---------------- SUMMARY CHART ---------------- */}
       <Grid container spacing={2}>
         <Grid item xs={12} lg={8}>
           <Card variant="outlined" sx={{ borderRadius: 3 }}>
             <CardContent>
-              <Stack
-                direction="row"
-                alignItems="center"
-                justifyContent="space-between"
-                mb={1}
-              >
+              <Stack direction="row" justifyContent="space-between" mb={1}>
                 <Typography variant="subtitle1" fontWeight={700}>
                   Summary
                 </Typography>
+
                 <ToggleButtonGroup
                   size="small"
                   value={period}
@@ -201,42 +430,26 @@ export default function Overview() {
 
               <Box sx={{ width: "100%", height: 280 }}>
                 <ResponsiveContainer>
-                  <BarChart data={monthlyData} barGap={6}>
+                  <LineChart data={chartData}>
+                    <CartesianGrid strokeDasharray="3 3" vertical={false} />
                     <XAxis dataKey="name" />
-                    <YAxis
-                      tickFormatter={(v) =>
-                        v >= 1000 ? `$${v / 1000}k` : `$${v}`
-                      }
-                    />
+                    <YAxis />
                     <Tooltip formatter={(v: number) => currency(v)} />
                     <Legend />
-                    <Bar
-                      dataKey="income"
-                      name="Income"
-                      fill="#6ec1e4"
-                      radius={[8, 8, 0, 0]}
-                    />
-                    <Bar
-                      dataKey="expense"
-                      name="Expenses"
-                      fill="#f5b971"
-                      radius={[8, 8, 0, 0]}
-                    />
-                  </BarChart>
+                    <Line dataKey="income" name="Income" stroke="#6ec1e4" strokeWidth={3} dot={false} />
+                    <Line dataKey="expense" name="Expenses" stroke="#f5b971" strokeWidth={3} dot={false} />
+                  </LineChart>
                 </ResponsiveContainer>
               </Box>
             </CardContent>
           </Card>
         </Grid>
 
+        {/* ---------------- PIE CHART CARD ---------------- */}
         <Grid item xs={12} lg={4}>
           <Card variant="outlined" sx={{ borderRadius: 3, height: "100%" }}>
             <CardContent>
-              <Stack
-                direction="row"
-                justifyContent="space-between"
-                alignItems="center"
-              >
+              <Stack direction="row" justifyContent="space-between">
                 <Typography variant="subtitle1" fontWeight={700}>
                   Cash Flow
                 </Typography>
@@ -244,27 +457,6 @@ export default function Overview() {
                   <MenuItem value="Last Month">Last Month</MenuItem>
                 </Select>
               </Stack>
-
-              <Grid container spacing={2} mt={1}>
-                <Grid item xs={4}>
-                  <Typography variant="body2" color="text.secondary">
-                    Daily
-                  </Typography>
-                  <Typography fontWeight={800}>$3,296</Typography>
-                </Grid>
-                <Grid item xs={4}>
-                  <Typography variant="body2" color="text.secondary">
-                    Weekly
-                  </Typography>
-                  <Typography fontWeight={800}>$5,840</Typography>
-                </Grid>
-                <Grid item xs={4}>
-                  <Typography variant="body2" color="text.secondary">
-                    Monthly
-                  </Typography>
-                  <Typography fontWeight={800}>$8,396</Typography>
-                </Grid>
-              </Grid>
 
               <Box sx={{ width: "100%", height: 240 }}>
                 <ResponsiveContainer>
@@ -275,76 +467,61 @@ export default function Overview() {
                       nameKey="name"
                       innerRadius={70}
                       outerRadius={100}
-                      paddingAngle={2}
                     >
                       {cashFlow.map((_, i) => (
                         <Cell key={i} fill={COLORS[i % COLORS.length]} />
                       ))}
+
                     </Pie>
                     <Tooltip formatter={(v: number) => currency(v)} />
                   </PieChart>
                 </ResponsiveContainer>
               </Box>
 
-              <Stack
-                direction="row"
-                justifyContent="center"
-                alignItems="center"
-                spacing={1}
-                mt={-1}
-                mb={1}
-              >
-                <Typography variant="caption" color="text.secondary">
-                  Total
-                </Typography>
+              <Stack direction="row" justifyContent="center" spacing={3} mt={1} mb={1}>
+                <Stack direction="row" spacing={1} alignItems="center">
+                  <Box sx={{ width: 12, height: 12, borderRadius: "50%", backgroundColor: COLORS[0] }} />
+                  <Typography variant="body2">Income</Typography>
+                </Stack>
+
+                <Stack direction="row" spacing={1} alignItems="center">
+                  <Box sx={{ width: 12, height: 12, borderRadius: "50%", backgroundColor: COLORS[1] }} />
+                  <Typography variant="body2">Expenses</Typography>
+                </Stack>
+              </Stack>
+
+              <Stack direction="row" justifyContent="center" spacing={1}>
+                <Typography variant="caption">Total</Typography>
                 <Typography fontWeight={800}>
                   {currency(totalCashFlow)}
                 </Typography>
-              </Stack>
-
-              <Stack direction="row" spacing={2} justifyContent="center">
-                <Stack direction="row" spacing={1} alignItems="center">
-                  <Box
-                    sx={{
-                      width: 10,
-                      height: 10,
-                      borderRadius: "50%",
-                      bgcolor: COLORS[0],
-                    }}
-                  />
-                  <Typography variant="caption">Salary</Typography>
-                </Stack>
-                <Stack direction="row" spacing={1} alignItems="center">
-                  <Box
-                    sx={{
-                      width: 10,
-                      height: 10,
-                      borderRadius: "50%",
-                      bgcolor: COLORS[1],
-                    }}
-                  />
-                  <Typography variant="caption">Expenses</Typography>
-                </Stack>
               </Stack>
             </CardContent>
           </Card>
         </Grid>
       </Grid>
 
+      {/* ---------------- TRANSACTIONS TABLE ---------------- */}
       <Card variant="outlined" sx={{ borderRadius: 3 }}>
         <CardContent>
-          <Stack
-            direction="row"
-            alignItems="center"
-            justifyContent="space-between"
-            mb={1}
-          >
-            <Typography variant="h6">Latest Transactions</Typography>
-            <Select size="small" value="April" disabled>
-              <MenuItem value="April">April</MenuItem>
+          <Stack direction="row" justifyContent="space-between" mb={1}>
+            <Typography variant="h6">Transactions</Typography>
+
+            <Select 
+            size="small" 
+            value = {selectedMonth}
+            onChange = {(e) => setSelectedMonth(e.target.value)}
+            >
+              {MONTHS.map((m) => (
+                <MenuItem key = {m} value = {m}>
+                  {m}
+                </MenuItem>
+              ))}
             </Select>
           </Stack>
+
           <Divider sx={{ mb: 1 }} />
+
           <Table size="small">
             <TableHead>
               <TableRow>
@@ -355,33 +532,36 @@ export default function Overview() {
                 <TableCell align="right">Amount</TableCell>
               </TableRow>
             </TableHead>
+
             <TableBody>
-              {tx.map((t, idx) => (
+              {filteredTransactions.slice(0, 5).map((t, idx) => (
                 <TableRow key={idx} hover>
                   <TableCell>{t.date}</TableCell>
-                  <TableCell>{t.name}</TableCell>
-                  <TableCell>{t.type}</TableCell>
+                  <TableCell>{t.description}</TableCell>
+
+                  <TableCell>{t.amount >= 0 ? "Income" : "Expense"}</TableCell>
+
                   <TableCell>
                     <Typography
-                      sx={{
-                        color: t.category === "Food" ? "orange" : "skyblue",
-                        fontWeight: 600,
-                      }}
+                    sx = {{
+                      color: t.category === "Food" ? "orange" : "skyblue",
+                      fontWeight: 600,
+                    }}
                     >
                       {t.category}
                     </Typography>
                   </TableCell>
+
                   <TableCell
-                    align="right"
-                    sx={{
-                      color: t.amount < 0 ? "error.main" : "success.main",
-                      fontWeight: 700,
-                    }}
+                  align="right"
+                  sx = {{
+                    color: t.amount < 0 ? "error.main" : "success.main",
+                    fontWeight: 700,
+                  }}
                   >
-                    {t.amount < 0 ? "-" : ""}
                     {currency(Math.abs(t.amount))}
                   </TableCell>
-                </TableRow>
+                  </TableRow>
               ))}
             </TableBody>
           </Table>

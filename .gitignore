@@ -9,6 +9,8 @@ target/
 
 # Environment / local config
 .env
+backend/.env
+frontend/.env
 .DS_Store
 
 # IDE / Editor stuff

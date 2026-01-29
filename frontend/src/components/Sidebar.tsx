@@ -16,7 +16,6 @@ const items = [
   { to: "/budgets", label: "Budgets", icon: <AccountBalanceWalletIcon /> },
   { to: "/goals", label: "Goals", icon: <FlagIcon /> },
   { to: "/transactions", label: "Transactions", icon: <ReceiptLongIcon /> },
-  { to: "/report", label: "Report", icon: <BarChartIcon /> },
 ];
 
 const secondary = [

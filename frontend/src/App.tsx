@@ -1,5 +1,5 @@
 import { Box } from "@mui/material";
-import { Routes, Route, Navigate } from "react-router-dom";
+import { Routes, Route, Navigate, useLocation } from "react-router-dom";
 import Sidebar from "./components/Sidebar";
 import Dashboard from "./pages/Dashboard";
 import Budgets from "./pages/Budgets";
@@ -9,11 +9,18 @@ import Report from "./pages/Report";
 import Settings from "./pages/Settings";
 import Help from "./pages/Help";
 import Profile from "./pages/Profile";
+import Login from "./pages/Login";
+import Signup from "./pages/Signup";
 
 export default function App() {
+  const location = useLocation();
+  const hideSidebar = location.pathname === "/login" || location.pathname === "/signup";
+
   return (
     <Box sx={{ display: "flex", height: "100vh", overflow: "hidden" }}>
+      {/* {!hideSidebar && <Sidebar />} */ }
       <Sidebar />
+
       <Box component="main" sx={{ flex: 1, overflow: "auto", p: 3 }}>
         <Routes>
           <Route path="/" element={<Navigate to="/dashboard" replace />} />
@@ -25,6 +32,8 @@ export default function App() {
           <Route path="/settings" element={<Settings />} />
           <Route path="/help" element={<Help />} />
           <Route path="/profile" element={<Profile />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/signup" element={<Signup />} />
           <Route path="*" element={<Navigate to="/overview" replace />} />
         </Routes>
       </Box>
